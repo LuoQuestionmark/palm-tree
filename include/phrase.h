@@ -1,0 +1,48 @@
+#pragma once
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#define MAX_SEGMENTATION 8
+#define SEG_0 (uint64_t)(0b1ll << 63)
+
+struct segmentation {
+    // use 8 * 64 bits integer to save the segmentation; the n-th bit (counting
+    // from the first one) is set to 1 if there is a segmentation at byte n.
+    // with the length of 64 bytes (8*8), the segmentation struct can provide
+    // segmentation info of a string of length less or equal to 256 bytes. for a
+    // typical UTF8 Chinese string, each Chinese character has a length of 4
+    // bytes, therefore one segmentation structure support at most 64 Chinese
+    // character.
+    uint64_t seg[MAX_SEGMENTATION];
+};
+
+typedef struct segmentation segmentation_t;
+
+struct phrase {
+    size_t length;
+    char *phrase;
+    segmentation_t cn_char_seg;
+    segmentation_t word_seg;
+};
+typedef struct phrase phrase_t;
+
+enum phrase_snprint_type {
+    PHRASE_SNPRINT_ORIGINAL    = 0,
+    PHRASE_SNPRINT_PER_CN_CHAR = 1,
+    PHRASE_SNPRINT_PER_CN_WORD = 2,
+};
+
+void segmentation_init(segmentation_t *segmentation);
+void segmentation_add(segmentation_t *segmentation, const int offset);
+void segmentation_del(segmentation_t *segmentation, const int offset);
+int segmentation_count(const segmentation_t *segmentation);
+bool segmentation_at(const segmentation_t *segmentation, const int offset,
+                     int *len);
+bool segmentation_get(const segmentation_t *segmentation, const int index,
+                      int *offset, int *len);
+
+phrase_t *phrase_init(const char *phrase_string);
+void phrase_free(phrase_t *phrase);
+void phrase_snprint(const phrase_t *phrase, enum phrase_snprint_type print_type,
+                    char *dst, size_t max_len);
