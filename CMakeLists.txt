@@ -10,14 +10,39 @@ add_link_options(-fsanitize=address)
 
 include_directories(include/)
 
-add_executable(palm_tree src/palm_tree.c
-    src/phrase.c)
+add_executable(palm_tree
+    src/palm_tree.c
+    src/phrase.c
+    src/words.c
+)
 
 
 enable_testing()
-add_executable(phrase_segment_test
-    test/phrase_segment_test.c
+
+add_executable(segment_test
+    test/segment_test.c
     src/phrase.c
 )
-add_test(NAME phrase_segment_test
-         COMMAND phrase_segment_test)
+add_test(
+    NAME segment_test
+    COMMAND segment_test
+)
+
+add_executable(phrase_test
+    test/phrase_test.c
+    src/phrase.c
+)
+add_test(
+    NAME phrase_test
+    COMMAND phrase_test
+)
+
+add_executable(words_test
+    test/words_test.c
+    src/phrase.c
+    src/words.c
+)
+add_test(
+    NAME words_test
+    COMMAND words_test
+)

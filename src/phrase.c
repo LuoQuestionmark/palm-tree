@@ -6,6 +6,80 @@
 #include <stdlib.h>
 #include <string.h>
 
+static void phrase_snprint_per_cn_char(const phrase_t *phrase, char *dst,
+                                       size_t maxlen) {
+    assert(phrase != NULL && dst != NULL);
+
+    char buffer[maxlen + 1];
+
+    memset(dst, 0, maxlen);
+    memset(buffer, 0, maxlen + 1);
+
+    int seg_len = 0;
+    int buffer_remain_size;
+    for (size_t offset = 0; offset < phrase->length; offset++) {
+        if (segmentation_at(&phrase->cn_char_seg, offset, &seg_len)) {
+            buffer_remain_size = maxlen - strlen(buffer) - 1;
+            if (seg_len > buffer_remain_size) {
+                // buffer will overflow with this operation
+                strncat(buffer, phrase->phrase + offset, buffer_remain_size);
+                break;
+            } else {
+                // otherwise just copy the word, then a space to separate
+                // chinese char
+                strncat(buffer, phrase->phrase + offset, seg_len);
+                strncat(buffer, " ", buffer_remain_size - 1);
+                offset += seg_len - 1;
+            }
+        }
+    }
+
+    if (strlen(buffer) - 1 > maxlen) {
+        fprintf(stderr,
+                "Warning: buffer size is not big enough, output truncated\n");
+        strncpy(dst, buffer, maxlen);
+    } else {
+        strncpy(dst, buffer, strlen(buffer) - 1);
+    }
+}
+
+static void phrase_snprint_per_cn_word(const phrase_t *phrase, char *dst,
+                                       size_t maxlen) {
+    assert(phrase != NULL && dst != NULL);
+
+    char buffer[maxlen + 1];
+
+    memset(dst, 0, maxlen);
+    memset(buffer, 0, maxlen + 1);
+
+    int seg_len = 0;
+    int buffer_remain_size;
+    for (size_t offset = 0; offset < phrase->length; offset++) {
+        if (segmentation_at(&phrase->word_seg, offset, &seg_len)) {
+            buffer_remain_size = maxlen - strlen(buffer) - 1;
+            if (seg_len > buffer_remain_size) {
+                // buffer will overflow with this operation
+                strncat(buffer, phrase->phrase + offset, buffer_remain_size);
+                break;
+            } else {
+                // otherwise just copy the word, then a space to separate
+                // chinese char
+                strncat(buffer, phrase->phrase + offset, seg_len);
+                strncat(buffer, " ", buffer_remain_size - 1);
+                offset += seg_len - 1;
+            }
+        }
+    }
+
+    if (strlen(buffer) - 1 > maxlen) {
+        fprintf(stderr,
+                "Warning: buffer size is not big enough, output truncated\n");
+        strncpy(dst, buffer, maxlen);
+    } else {
+        strncpy(dst, buffer, strlen(buffer) - 1);
+    }
+}
+
 void segmentation_init(segmentation_t *segmentation) {
     assert(segmentation);
 
@@ -145,29 +219,29 @@ void phrase_free(phrase_t *phrase) {
 }
 
 void phrase_snprint(const phrase_t *phrase, enum phrase_snprint_type print_type,
-                    char *dst, size_t max_len) {
+                    char *dst, size_t maxlen) {
     assert(phrase != NULL && dst != NULL);
+    memset(dst, 0, maxlen);
 
     switch (print_type) {
     case PHRASE_SNPRINT_ORIGINAL:
-        strncpy(dst, phrase->phrase, max_len);
+        strncpy(dst, phrase->phrase, maxlen);
         break;
     case PHRASE_SNPRINT_PER_CN_CHAR:
         if (phrase->cn_char_seg.seg[0] == 0) {
             fprintf(stderr, "cannot generate phrase with character "
-                            "segmentation, segmentation is not defined");
+                            "segmentation, segmentation is not defined\n");
             return;
         }
-
-        // TODO
+        phrase_snprint_per_cn_char(phrase, dst, maxlen);
         break;
     case PHRASE_SNPRINT_PER_CN_WORD:
         if (phrase->cn_char_seg.seg[0] == 0) {
             fprintf(stderr, "cannot generate phrase with word segmentation, "
-                            "segmentation is not defined");
+                            "segmentation is not defined\n");
             return;
         }
-        // TODO
+        phrase_snprint_per_cn_word(phrase, dst, maxlen);
         break;
     }
 }

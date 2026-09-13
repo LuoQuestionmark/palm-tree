@@ -7,13 +7,13 @@
 #define SEG_0 (uint64_t)(0b1ll << 63)
 
 struct segmentation {
-    // use 8 * 64 bits integer to save the segmentation; the n-th bit (counting
-    // from the first one) is set to 1 if there is a segmentation at byte n.
-    // with the length of 64 bytes (8*8), the segmentation struct can provide
-    // segmentation info of a string of length less or equal to 256 bytes. for a
-    // typical UTF8 Chinese string, each Chinese character has a length of 4
-    // bytes, therefore one segmentation structure support at most 64 Chinese
-    // character.
+    /* use 8 * 64 bits integer to save the segmentation; the n-th bit (counting
+     * from the first one) is set to 1 if there is a segmentation at byte n.
+     * with the length of 64 bytes (8*8), the segmentation struct can provide
+     * segmentation info of a string of length less or equal to 256 bytes. for a
+     * typical UTF8 Chinese string, each Chinese character has a length of 4
+     * bytes, therefore one segmentation structure support at most 64 Chinese
+     * character. */
     uint64_t seg[MAX_SEGMENTATION];
 };
 
