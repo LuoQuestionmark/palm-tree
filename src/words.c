@@ -1,8 +1,28 @@
 #include "words.h"
 #include "phrase.h"
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+const char *POS_TAG_str(enum POS_TAG pt) {
+    switch (pt) {
+    case POS_TAG_UNDEFINED:
+        return "UNDEFINED";
+    case POS_TAG_AD:
+        return "AD";
+    case POS_TAG_CD:
+        return "CD";
+    case POS_TAG_NN:
+        return "NN";
+    case POS_TAG_VV:
+        return "VV";
+    default:
+        // implementation needed
+        return "UNIMPLEMENTED! Check source code";
+    }
+    return NULL;
+}
 
 words_t *phrase_segment(phrase_t *phrase, segmentation_t *segmentation) {
     assert(phrase && segmentation);
@@ -47,4 +67,19 @@ void words_tagging(words_t *words) {
 int words_eval(words_t *words) {
     assert(words);
     return -1;
+}
+
+void words_fprint(FILE *restrict stream, words_t *words) {
+    assert(stream);
+    assert(words);
+    for (int i = 0; i < words->count - 1; i++) {
+        fprintf(stream, "%s<%s> ", words->word_strings[i],
+                POS_TAG_str(words->pos_tags[i]));
+    }
+
+    // print the last one separately, with no trailing space
+    fprintf(stream, "%s<%s>", words->word_strings[words->count - 1],
+            POS_TAG_str(words->pos_tags[words->count - 1]));
+
+    fflush(stream);
 }

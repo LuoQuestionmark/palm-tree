@@ -1,6 +1,7 @@
 #pragma once
 
 #include "phrase.h"
+#include <stdio.h>
 
 enum POS_TAG {
     POS_TAG_UNDEFINED = 0,
@@ -22,8 +23,13 @@ struct words {
     segmentation_t segmentation;
 };
 
+const char *POS_TAG_str(enum POS_TAG pt);
+
 words_t *phrase_segment(phrase_t *phrase, segmentation_t *segmentation);
 void words_free(words_t *words);
 
 void words_tagging(words_t *words); // assign tags to each separated words
 int words_eval(words_t *words);     // evaluate current words separation
+
+// helper function, print to help dev
+void words_fprint(FILE *restrict stream, words_t *words);

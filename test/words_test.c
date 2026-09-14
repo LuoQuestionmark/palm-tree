@@ -3,6 +3,7 @@
 #include "phrase.h"
 #include "words.h"
 #include <assert.h>
+#include <stdio.h>
 #include <string.h>
 
 int main() {
@@ -15,6 +16,14 @@ int main() {
     assert(words->count == 2);
     assert(strcmp(words->word_strings[0], "测试") == 0);
     assert(strcmp(words->word_strings[1], "句子") == 0);
+
+    words->pos_tags[0] = POS_TAG_VV;
+    words->pos_tags[1] = POS_TAG_NN;
+
+    char buffer[1024] = { 0 };
+    FILE *buffer_ptr  = fmemopen(buffer, sizeof(buffer), "w");
+    words_fprint(buffer_ptr, words);
+    assert(strcmp(buffer, "测试<VV> 句子<NN>") == 0);
 
     words_free(words);
     phrase_free(p1);
