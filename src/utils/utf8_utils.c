@@ -1,4 +1,4 @@
-#include "utf8_utils.h"
+#include "utils/utf8_utils.h"
 #include <assert.h>
 
 int utf8_char_len(const char *utf8_char) {

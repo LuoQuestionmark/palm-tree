@@ -1,6 +1,6 @@
 #include "phrase.h"
 #include "phrase_filter.h"
-#include "utf8_utils.h"
+#include "utils/utf8_utils.h"
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
