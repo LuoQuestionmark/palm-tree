@@ -1,4 +1,5 @@
 #include "phrase.h"
+#include "utf8_utils.h"
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -80,6 +81,28 @@ static void phrase_snprint_per_cn_word(const phrase_t *phrase, char *dst,
     }
 }
 
+static bool phrase_utf8_char_segmentation(phrase_t *phrase) {
+    assert(phrase);
+    if (phrase->phrase == NULL) return false;
+    if (strlen(phrase->phrase) == 0) return false;
+
+    segmentation_init(&phrase->cn_char_seg);
+
+    int phrase_size = (int)strlen(phrase->phrase);
+
+    for (int i = 0; i < MAX_SEGMENTATION_BYTE && i < phrase_size;
+         /*i += offset, already implemented*/) {
+        char *current = phrase->phrase + i;
+        int offset    = utf8_char_len(current);
+        if (offset < 0) return false;
+
+        segmentation_add(&phrase->cn_char_seg, i);
+        i += offset;
+    }
+
+    return true;
+}
+
 void segmentation_init(segmentation_t *segmentation) {
     assert(segmentation);
 
@@ -90,7 +113,7 @@ void segmentation_init(segmentation_t *segmentation) {
 
 void segmentation_add(segmentation_t *segmentation, const int offset) {
     assert(segmentation);
-    assert(offset >= 0 && offset < (int)(MAX_SEGMENTATION * 64));
+    assert(offset >= 0 && offset < (int)(MAX_SEGMENTATION_BYTE));
 
     int seg_data_number = offset / 64;
     int seg_reminder    = offset % 64;
@@ -100,7 +123,7 @@ void segmentation_add(segmentation_t *segmentation, const int offset) {
 
 void segmentation_del(segmentation_t *segmentation, const int offset) {
     assert(segmentation);
-    assert(offset >= 0 && offset < (int)(MAX_SEGMENTATION * 64));
+    assert(offset >= 0 && offset < (int)(MAX_SEGMENTATION_BYTE));
     int seg_offset   = offset / 64;
     int seg_reminder = offset % 64;
 
@@ -111,7 +134,7 @@ int segmentation_count(const segmentation_t *segmentation) {
     assert(segmentation);
 
     int count = 0;
-    for (int i = 0; i < MAX_SEGMENTATION; i++) {
+    for (int i = 0; i < MAX_SEGMENTATION_SEG; i++) {
         uint64_t seg = segmentation->seg[i];
         for (int j = 0; j < 64; j++) {
             if (seg & 0b1) {
@@ -130,7 +153,7 @@ bool segmentation_at(const segmentation_t *segmentation, const int offset,
 
     bool value = false;
 
-    if (offset < 0 || offset >= 8 * 64) {
+    if (offset < 0 || offset >= MAX_SEGMENTATION_BYTE) {
         return false;
     }
 
@@ -147,7 +170,7 @@ bool segmentation_at(const segmentation_t *segmentation, const int offset,
     }
 
     *len = 1;
-    for (int i = seg_offset; i < MAX_SEGMENTATION; i++) {
+    for (int i = seg_offset; i < MAX_SEGMENTATION_SEG; i++) {
         uint64_t seg = segmentation->seg[i];
         for (int j = 0; j < 64; j++) {
             if (i == seg_offset && j <= seg_reminder) continue;
@@ -166,11 +189,11 @@ bool segmentation_get(const segmentation_t *segmentation, const int index,
     assert(segmentation);
     assert(offset && len);
 
-    if (index < 0 || index > MAX_SEGMENTATION * 64) return false;
+    if (index < 0 || index > MAX_SEGMENTATION_BYTE) return false;
 
     int remains = index;
     bool found  = false;
-    for (int i = 0; i < MAX_SEGMENTATION; i++) {
+    for (int i = 0; i < MAX_SEGMENTATION_SEG; i++) {
         uint64_t seg = segmentation->seg[i];
         for (int j = 0; j < 64; j++) {
             // printf("%064lb, %064lb\n", seg & (SEG_0 >> j), (SEG_0 >> j));
@@ -192,7 +215,7 @@ bool segmentation_get(const segmentation_t *segmentation, const int index,
         }
     }
     if (found) {
-        *len = (MAX_SEGMENTATION * 64) - *offset;
+        *len = (MAX_SEGMENTATION_BYTE) - *offset;
         return true;
     }
     return false;
@@ -202,11 +225,18 @@ phrase_t *phrase_init(const char *phrase_string) {
     phrase_t *phrase = calloc(1, sizeof(phrase_t));
     if (phrase == NULL) {
         perror("calloc");
-        abort();
+        return NULL;
     }
 
     phrase->length = strlen(phrase_string);
     phrase->phrase = strdup(phrase_string);
+
+    bool character_seg_ok = phrase_utf8_char_segmentation(phrase);
+    if (!character_seg_ok) {
+        fprintf(stderr, "input string is not a valid utf8 string: %s\n",
+                phrase_string);
+        return NULL;
+    }
 
     return phrase;
 }

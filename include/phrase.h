@@ -3,7 +3,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define MAX_SEGMENTATION 8
+#define MAX_SEGMENTATION_SEG 8
+#define MAX_SEGMENTATION_BYTE (MAX_SEGMENTATION_SEG * 64)
 #define SEG_0 (uint64_t)(0b1ll << 63)
 
 struct segmentation {
@@ -14,7 +15,7 @@ struct segmentation {
      * typical UTF8 Chinese string, each Chinese character has a length of 4
      * bytes, therefore one segmentation structure support at most 64 Chinese
      * character. */
-    uint64_t seg[MAX_SEGMENTATION];
+    uint64_t seg[MAX_SEGMENTATION_SEG];
 };
 
 typedef struct segmentation segmentation_t;

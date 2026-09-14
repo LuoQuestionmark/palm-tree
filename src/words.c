@@ -11,6 +11,8 @@ words_t *phrase_segment(phrase_t *phrase, segmentation_t *segmentation) {
     int words_count     = segmentation_count(segmentation);
     words->count        = words_count;
     words->word_strings = calloc(words_count, sizeof(char *));
+    words->pos_tags     = calloc(words_count, sizeof(enum POS_TAG));
+    words->segmentation = *segmentation;
 
     int offset, len;
     char buffer[1024];
@@ -27,11 +29,22 @@ words_t *phrase_segment(phrase_t *phrase, segmentation_t *segmentation) {
 
 void words_free(words_t *words) {
     if (words == NULL) return;
-    assert(words->word_strings); // problematic initialization
+    assert(words->word_strings &&
+           words->pos_tags); // problematic initialization
 
     for (int i = 0; i < words->count; i++) {
         free(words->word_strings[i]);
     }
     free(words->word_strings);
+    free(words->pos_tags);
     free(words);
+}
+
+void words_tagging(words_t *words) {
+    assert(words);
+}
+
+int words_eval(words_t *words) {
+    assert(words);
+    return -1;
 }

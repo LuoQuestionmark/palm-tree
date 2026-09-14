@@ -5,16 +5,16 @@
 #include <string.h>
 
 int main() {
-    phrase_t *p1        = phrase_init("测试句子");
-    segmentation_t *seg = &p1->cn_char_seg;
+    phrase_t *p1 = phrase_init("测试句子");
 
-    segmentation_init(seg);
-    segmentation_add(seg, 3);
-    segmentation_add(seg, 6);
-    segmentation_add(seg, 9);
+    // segmentation_t *seg = &p1->cn_char_seg;
+    // segmentation_init(seg);
+    // segmentation_add(seg, 3);
+    // segmentation_add(seg, 6);
+    // segmentation_add(seg, 9);
     // segmentation_add(seg, 12);
 
-    seg = &p1->word_seg;
+    segmentation_t *seg = &p1->word_seg;
     segmentation_init(seg);
     segmentation_add(seg, 6);
 

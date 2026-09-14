@@ -14,6 +14,7 @@ add_executable(palm_tree
     src/palm_tree.c
     src/phrase.c
     src/words.c
+    src/utf8_utils.c
 )
 
 
@@ -22,6 +23,7 @@ enable_testing()
 add_executable(segment_test
     test/segment_test.c
     src/phrase.c
+    src/utf8_utils.c
 )
 add_test(
     NAME segment_test
@@ -31,6 +33,7 @@ add_test(
 add_executable(phrase_test
     test/phrase_test.c
     src/phrase.c
+    src/utf8_utils.c
 )
 add_test(
     NAME phrase_test
@@ -41,6 +44,7 @@ add_executable(words_test
     test/words_test.c
     src/phrase.c
     src/words.c
+    src/utf8_utils.c
 )
 add_test(
     NAME words_test
