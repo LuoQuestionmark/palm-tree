@@ -47,3 +47,12 @@ phrase_t *phrase_init(const char *phrase_string);
 void phrase_free(phrase_t *phrase);
 void phrase_snprint(const phrase_t *phrase, enum phrase_snprint_type print_type,
                     char *dst, size_t max_len);
+
+// generate utf8 char segmentation (saved in `phrase_t->cn_char_seg`), return
+// True if such segmentation is possible
+bool phrase_utf8_char_segmentation(phrase_t *phrase);
+
+// generate `seg_c` count (of less) of best segmentation, save value to `seg_v`,
+// save the best segmentation to `phrase_t` (`phrase_t->word_seg`)
+void phrase_base_word_segmentation(phrase_t *phrase, int seg_c,
+                                   segmentation_t *seg_v[seg_c]);

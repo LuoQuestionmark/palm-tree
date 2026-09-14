@@ -1,4 +1,5 @@
 #include "phrase.h"
+#include "phrase_filter.h"
 #include "utf8_utils.h"
 #include <assert.h>
 #include <stdbool.h>
@@ -79,28 +80,6 @@ static void phrase_snprint_per_cn_word(const phrase_t *phrase, char *dst,
     } else {
         strncpy(dst, buffer, strlen(buffer) - 1);
     }
-}
-
-static bool phrase_utf8_char_segmentation(phrase_t *phrase) {
-    assert(phrase);
-    if (phrase->phrase == NULL) return false;
-    if (strlen(phrase->phrase) == 0) return false;
-
-    segmentation_init(&phrase->cn_char_seg);
-
-    int phrase_size = (int)strlen(phrase->phrase);
-
-    for (int i = 0; i < MAX_SEGMENTATION_BYTE && i < phrase_size;
-         /*i += offset, already implemented*/) {
-        char *current = phrase->phrase + i;
-        int offset    = utf8_char_len(current);
-        if (offset < 0) return false;
-
-        segmentation_add(&phrase->cn_char_seg, i);
-        i += offset;
-    }
-
-    return true;
 }
 
 void segmentation_init(segmentation_t *segmentation) {
@@ -274,4 +253,41 @@ void phrase_snprint(const phrase_t *phrase, enum phrase_snprint_type print_type,
         phrase_snprint_per_cn_word(phrase, dst, maxlen);
         break;
     }
+}
+
+bool phrase_utf8_char_segmentation(phrase_t *phrase) {
+    assert(phrase);
+    if (phrase->phrase == NULL) return false;
+    if (strlen(phrase->phrase) == 0) return false;
+
+    segmentation_init(&phrase->cn_char_seg);
+
+    int phrase_size = (int)strlen(phrase->phrase);
+
+    for (int i = 0; i < MAX_SEGMENTATION_BYTE && i < phrase_size;
+         /*i += offset, already implemented*/) {
+        char *current = phrase->phrase + i;
+        int offset    = utf8_char_len(current);
+        if (offset < 0) return false;
+
+        segmentation_add(&phrase->cn_char_seg, i);
+        i += offset;
+    }
+
+    return true;
+}
+
+void phrase_base_word_segmentation(phrase_t *phrase, int seg_c,
+                                   segmentation_t *seg_v[seg_c]) {
+    assert(phrase);
+    if (seg_v == NULL) return;
+    if (seg_c < 1) return;
+
+    // TODO: complete filter process
+
+    segmentation_t *seg = calloc(1, sizeof(segmentation_t));
+
+    phrase_filter_dict_words(phrase, &phrase->cn_char_seg, seg);
+
+    seg_v[0] = seg;
 }
