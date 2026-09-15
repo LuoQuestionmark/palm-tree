@@ -32,4 +32,7 @@ int main() {
     assert(segmentation_at(&seg1, offset1, NULL));
     assert(segmentation_at(&seg1, offset1, &len));
     assert(len == offset2 - offset1);
+
+    segmentation_pop_n(&seg1, 0, 3);
+    assert(seg1.seg[0] == 0);
 }

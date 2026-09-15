@@ -1,5 +1,7 @@
 #include "utils/utf8_utils.h"
 #include <assert.h>
+#include <stdio.h>
+#include <string.h>
 
 int utf8_char_len(const char *utf8_char) {
     assert(utf8_char);
@@ -15,9 +17,8 @@ int utf8_char_len(const char *utf8_char) {
     static const char utf8_len3_mask  = 0b11110000;
     static const char utf8_len3_value = 0b11100000;
 
-    static const char utf8_len4_mask  = 0b11111000;
-    static const char utf8_len4_value = 0b11110000;
-
+    static const char utf8_len4_mask   = 0b11111000;
+    static const char utf8_len4_value  = 0b11110000;
     static const char utf8_suite_mask  = 0b11000000;
     static const char utf8_suite_value = 0b10000000;
 
@@ -44,4 +45,30 @@ int utf8_char_len(const char *utf8_char) {
     }
 
     return -1;
+}
+
+bool utf8_char_load_n(const char *src, char *dst, size_t dst_size, int len) {
+    assert(src && dst);
+    assert(dst_size > 0 && len > 0);
+
+    size_t tot_len = 0;
+    int offset     = 0;
+
+    for (int i = 0; i < len; i++) {
+        offset = utf8_char_len(src);
+        if (offset <= 0) return false;
+
+        tot_len += offset;
+    }
+
+    if (tot_len > dst_size) {
+        fprintf(stderr,
+                "cannot copy full text from src to dst: dst has a size of %ld, "
+                "while u8 char of length %d requires %ld bytes",
+                dst_size, len, tot_len);
+        return false;
+    }
+
+    strncpy(dst, src, tot_len);
+    return true;
 }

@@ -92,7 +92,7 @@ void segmentation_init(segmentation_t *segmentation) {
 
 void segmentation_add(segmentation_t *segmentation, const int offset) {
     assert(segmentation);
-    assert(offset >= 0 && offset < (int)(MAX_SEGMENTATION_BYTE));
+    assert(offset >= 0 && offset < MAX_SEGMENTATION_BYTE);
 
     int seg_data_number = offset / 64;
     int seg_reminder    = offset % 64;
@@ -102,11 +102,36 @@ void segmentation_add(segmentation_t *segmentation, const int offset) {
 
 void segmentation_del(segmentation_t *segmentation, const int offset) {
     assert(segmentation);
-    assert(offset >= 0 && offset < (int)(MAX_SEGMENTATION_BYTE));
+    assert(offset >= 0 && offset < MAX_SEGMENTATION_BYTE);
     int seg_offset   = offset / 64;
     int seg_reminder = offset % 64;
 
     segmentation->seg[seg_offset] &= ~(SEG_0 >> seg_reminder);
+}
+
+void segmentation_pop(segmentation_t *segmentation, const int offset) {
+    assert(segmentation);
+    assert(offset >= 0 && offset < MAX_SEGMENTATION_BYTE);
+
+    int seg_offset   = offset / 64;
+    int seg_reminder = offset % 64;
+
+    for (int i = seg_offset; i < MAX_SEGMENTATION_SEG; i++) {
+        uint64_t seg = segmentation->seg[i];
+        for (int j = 0; j < 64; j++) {
+            if (i == seg_offset && j < seg_reminder) continue;
+            if (seg & (SEG_0 >> j)) {
+                segmentation_del(segmentation, seg_offset * 64 + j);
+                return;
+            }
+        }
+    }
+}
+
+void segmentation_pop_n(segmentation_t *segmentation, const int offset, int n) {
+    for (int i = 0; i < n; i++) {
+        segmentation_pop(segmentation, offset);
+    }
 }
 
 int segmentation_count(const segmentation_t *segmentation) {
@@ -287,7 +312,8 @@ void phrase_base_word_segmentation(phrase_t *phrase, int seg_c,
 
     segmentation_t *seg = calloc(1, sizeof(segmentation_t));
 
-    phrase_filter_dict_words(phrase, &phrase->cn_char_seg, seg);
+    phrase_filter_dict_words(phrase, &phrase->cn_char_seg, seg,
+                             PHRASE_DICT_FILTER_LONGEST);
 
     seg_v[0] = seg;
 }

@@ -37,6 +37,9 @@ enum phrase_snprint_type {
 void segmentation_init(segmentation_t *segmentation);
 void segmentation_add(segmentation_t *segmentation, const int offset);
 void segmentation_del(segmentation_t *segmentation, const int offset);
+void segmentation_pop(segmentation_t *segmentation, const int offset);
+void segmentation_pop_n(segmentation_t *segmentation, const int offset, int n);
+
 int segmentation_count(const segmentation_t *segmentation);
 bool segmentation_at(const segmentation_t *segmentation, const int offset,
                      int *len);
