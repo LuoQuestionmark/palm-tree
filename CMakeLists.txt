@@ -46,6 +46,20 @@ add_test(
     COMMAND phrase_test
 )
 
+add_executable(phrase_filter_test
+    test/phrase_filter_test.c
+    src/phrase.c
+    src/phrase_filter.c
+    src/utils/dict.c
+    src/utils/utf8_utils.c
+    src/words.c
+)
+add_test(
+    NAME phrase_filter_test
+    COMMAND phrase_filter_test
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
 add_executable(words_test
     test/words_test.c
     src/phrase.c

@@ -19,6 +19,11 @@ bool dict_load_file(dict_t *dict, const char *filename) {
     assert(filename);
 
     FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        perror("fopen");
+        return false;
+    }
+
     size_t chunk_size =
         fread(dict->buffer, sizeof(char), MAX_DICT_BUFFER_SIZE - 1, file);
 
@@ -28,12 +33,14 @@ bool dict_load_file(dict_t *dict, const char *filename) {
     }
 
     dict->buffer[chunk_size] = '\0';
+    dict->loaded             = true;
+
     fclose(file);
     return true;
 }
 
 bool dict_exist(const dict_t *dict, const char *word) {
-    if (dict == NULL) return false;
+    if (dict == NULL || !dict->loaded) return false;
     if (word == NULL || strlen(word) == 0) return false;
 
     bool ret = true;

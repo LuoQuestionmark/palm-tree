@@ -1,4 +1,5 @@
 #pragma once
+#include "utils/dict.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -57,5 +58,5 @@ bool phrase_utf8_char_segmentation(phrase_t *phrase);
 
 // generate `seg_c` count (of less) of best segmentation, save value to `seg_v`,
 // save the best segmentation to `phrase_t` (`phrase_t->word_seg`)
-void phrase_base_word_segmentation(phrase_t *phrase, int seg_c,
+void phrase_base_word_segmentation(phrase_t *phrase, dict_t *dict, int seg_c,
                                    segmentation_t *seg_v[seg_c]);

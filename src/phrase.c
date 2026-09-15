@@ -1,5 +1,6 @@
 #include "phrase.h"
 #include "phrase_filter.h"
+#include "utils/dict.h"
 #include "utils/utf8_utils.h"
 #include <assert.h>
 #include <stdbool.h>
@@ -302,9 +303,9 @@ bool phrase_utf8_char_segmentation(phrase_t *phrase) {
     return true;
 }
 
-void phrase_base_word_segmentation(phrase_t *phrase, int seg_c,
+void phrase_base_word_segmentation(phrase_t *phrase, dict_t *dict, int seg_c,
                                    segmentation_t *seg_v[seg_c]) {
-    assert(phrase);
+    assert(phrase && dict);
     if (seg_v == NULL) return;
     if (seg_c < 1) return;
 
@@ -312,7 +313,7 @@ void phrase_base_word_segmentation(phrase_t *phrase, int seg_c,
 
     segmentation_t *seg = calloc(1, sizeof(segmentation_t));
 
-    phrase_filter_dict_words(phrase, &phrase->cn_char_seg, seg,
+    phrase_filter_dict_words(phrase, &phrase->cn_char_seg, seg, dict,
                              PHRASE_DICT_FILTER_LONGEST);
 
     seg_v[0] = seg;

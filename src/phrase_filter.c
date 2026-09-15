@@ -3,13 +3,11 @@
 #include "utils/dict.h"
 #include "utils/utf8_utils.h"
 #include <assert.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-static dict_t *dict = NULL;
-
-static void phrase_filter_dict_longest(phrase_t *phrase, segmentation_t *seg) {
+static void phrase_filter_dict_longest(phrase_t *phrase, dict_t *dict,
+                                       segmentation_t *seg) {
     assert(phrase && seg);
 
     char buffer[MAX_CN_WORD_LEN * 4 + 1] = { 0 };
@@ -22,7 +20,7 @@ static void phrase_filter_dict_longest(phrase_t *phrase, segmentation_t *seg) {
             exit(EXIT_FAILURE);
         }
 
-        for (int j = MAX_CN_WORD_LEN; j >= MIN_CN_WORD_LEN; j++) {
+        for (int j = MAX_CN_WORD_LEN; j >= MIN_CN_WORD_LEN; j--) {
             memset(buffer, 0, sizeof(buffer));
             if (!utf8_char_load_n(phrase->phrase + offset, buffer,
                                   sizeof(buffer), j)) {
@@ -36,7 +34,7 @@ static void phrase_filter_dict_longest(phrase_t *phrase, segmentation_t *seg) {
             // if a word consisting j utf8 detected at given offset, then set
             // the next (j - 1) segmentation point to zero
 
-            segmentation_pop_n(seg, offset, (j - 1));
+            segmentation_pop_n(seg, offset + 1, (j - 1));
 
             break;
         }
@@ -44,21 +42,23 @@ static void phrase_filter_dict_longest(phrase_t *phrase, segmentation_t *seg) {
 }
 
 void phrase_filter_dict_words(phrase_t *phrase, const segmentation_t *seg_in,
-                              segmentation_t *seg_out,
+                              segmentation_t *seg_out, dict_t *dict,
                               const enum PHRASE_DICT_FILTER_STRATEGY strategy) {
     assert(phrase);
+    assert(dict);
 
     *seg_out = *seg_in;
 
-    if (dict == NULL) {
-        if (!dict_load_file(dict, "resource/cedict_ts.u8")) {
-            exit(EXIT_FAILURE);
-        }
-    }
+    // if (dict == NULL) {
+    //     dict = dict_init();
+    //     if (!dict_load_file(dict, "resource/cedict_ts.u8")) {
+    //         exit(EXIT_FAILURE);
+    //     }
+    // }
 
     switch (strategy) {
     case PHRASE_DICT_FILTER_LONGEST:
-        phrase_filter_dict_longest(phrase, seg_out);
+        phrase_filter_dict_longest(phrase, dict, seg_out);
     default:
         break;
     }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "phrase.h"
+#include "utils/dict.h"
 
 #define MIN_CN_WORD_LEN 2 // minimum chinese word length by character
 #define MAX_CN_WORD_LEN 8 // maximum chinese word length by character
@@ -11,7 +12,7 @@ enum PHRASE_DICT_FILTER_STRATEGY {
 };
 
 void phrase_filter_dict_words(phrase_t *phrase, const segmentation_t *seg_in,
-                              segmentation_t *seg_out,
+                              segmentation_t *seg_out, dict_t *dict,
                               const enum PHRASE_DICT_FILTER_STRATEGY);
 
 void phrase_filter_ordinal_number(phrase_t *phrase,
