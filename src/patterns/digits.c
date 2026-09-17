@@ -111,3 +111,16 @@ int is_cn_char_digits(const char *utf8_string) {
     }
     return len;
 }
+
+int is_ordinal_cn_char_digits(const char *utf8_string) {
+    char buffer[4];
+    const char *next = utf8_char_consume(utf8_string, buffer);
+    if (strncmp(buffer, "第", sizeof("第")) != 0) {
+        return -1;
+    }
+
+    int len = is_cn_char_digits(next);
+    if (len > 0) return len + 1;
+
+    return -1;
+}

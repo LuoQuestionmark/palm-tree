@@ -83,3 +83,24 @@ void words_fprint(FILE *restrict stream, words_t *words) {
 
     fflush(stream);
 }
+
+void words_snprint(char str[restrict], size_t size, words_t *words) {
+    assert(str);
+    assert(words);
+
+    char buffer[1024] = { 0 };
+
+    memset(str, 0, size);
+
+    for (int i = 0; i < words->count - 1; i++) {
+        snprintf(buffer, sizeof(buffer), "%s<%s> ", words->word_strings[i],
+                 POS_TAG_str(words->pos_tags[i]));
+        strncat(str, buffer, size);
+    }
+
+    // print the last one separately, with no trailing space
+    snprintf(buffer, sizeof(buffer), "%s<%s>",
+             words->word_strings[words->count - 1],
+             POS_TAG_str(words->pos_tags[words->count - 1]));
+    strncat(str, buffer, size);
+}

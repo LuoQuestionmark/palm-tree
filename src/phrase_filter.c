@@ -61,8 +61,28 @@ void phrase_filter_dict_words(phrase_t *phrase, const segmentation_t *seg_in,
 void phrase_filter_ordinal_number(phrase_t *phrase,
                                   const segmentation_t *seg_in,
                                   segmentation_t *seg_out) {
-    // TODO
+    assert(phrase);
+    assert(seg_in && seg_out);
+
     *seg_out = *seg_in;
+
+    for (int i = 0; i < segmentation_count(seg_out); i++) {
+        int offset, len;
+        if (!segmentation_get(seg_out, i, &offset, &len)) {
+            // unexpected branch, reached only when `seg_count` or `seg_get`
+            // does not set correctly
+            exit(EXIT_FAILURE);
+        }
+
+        const char *current      = phrase->phrase + offset;
+        int digits_cn_char_count = 0;
+
+        digits_cn_char_count = is_ordinal_cn_char_digits(current);
+        if (digits_cn_char_count > 0) {
+            segmentation_pop_n(seg_out, offset + 1, (digits_cn_char_count - 1));
+            continue;
+        }
+    }
 }
 
 void phrase_filter_cardinal_number(phrase_t *phrase,
@@ -77,7 +97,7 @@ void phrase_filter_cardinal_number(phrase_t *phrase,
         int offset, len;
         if (!segmentation_get(seg_out, i, &offset, &len)) {
             // unexpected branch, reached only when `seg_count` or `seg_get`
-            // does not word correctly
+            // does not set correctly
             exit(EXIT_FAILURE);
         }
 

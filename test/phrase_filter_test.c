@@ -4,6 +4,7 @@
 #include "words.h"
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 void test_one() {
     phrase_t *p = phrase_init("亚马逊苹果");
@@ -32,9 +33,32 @@ void test_two() {
     phrase_filter_cardinal_number(p, &p->cn_char_seg, &seg);
 
     words_t *words = phrase_segment(p, &seg);
-    words_fprint(stdout, words);
-    puts("");
+
+    char buffer[1024] = { 0 };
+    words_snprint(buffer, sizeof(buffer), words);
+
+    assert(strncmp(buffer, "一百三十二<UNDEFINED> 人<UNDEFINED>",
+                   sizeof(buffer)) == 0);
     assert(words->count == 2);
+
+    words_free(words);
+    phrase_free(p);
+}
+
+void test_three() {
+    phrase_t *p = phrase_init("第九十九苹果");
+    segmentation_t seg;
+
+    phrase_filter_ordinal_number(p, &p->cn_char_seg, &seg);
+
+    words_t *words = phrase_segment(p, &seg);
+
+    char buffer[1024] = { 0 };
+    words_snprint(buffer, sizeof(buffer), words);
+
+    assert(strncmp(buffer, "第九十九<UNDEFINED> 苹<UNDEFINED> 果<UNDEFINED>",
+                   sizeof(buffer)) == 0);
+    assert(words->count == 3);
 
     words_free(words);
     phrase_free(p);
@@ -43,4 +67,5 @@ void test_two() {
 int main() {
     test_one();
     test_two();
+    test_three();
 }
