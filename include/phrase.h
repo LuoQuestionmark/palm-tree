@@ -8,6 +8,8 @@
 #define MAX_SEGMENTATION_BYTE (MAX_SEGMENTATION_SEG * 64)
 #define SEG_0 (uint64_t)(0b1ll << 63)
 
+#define PHRASE_BUFFER_SIZE (1024 * 4)
+
 struct segmentation {
     /* use 8 * 64 bits integer to save the segmentation; the n-th bit (counting
      * from the first one) is set to 1 if there is a segmentation at byte n.
@@ -28,6 +30,13 @@ struct phrase {
     segmentation_t word_seg;
 };
 typedef struct phrase phrase_t;
+
+struct phrase_list {
+    int count;
+    int size;
+    phrase_t **phrases;
+};
+typedef struct phrase_list phrase_list_t;
 
 enum phrase_snprint_type {
     PHRASE_SNPRINT_ORIGINAL    = 0,
@@ -60,3 +69,9 @@ bool phrase_utf8_char_segmentation(phrase_t *phrase);
 // save the best segmentation to `phrase_t` (`phrase_t->word_seg`)
 void phrase_base_word_segmentation(phrase_t *phrase, dict_t *dict, int seg_c,
                                    segmentation_t *seg_v[seg_c]);
+
+phrase_list_t *phrase_list_init();
+void phrase_list_free(phrase_list_t *ph_list);
+void phrase_list_append(phrase_list_t *ph_list, phrase_t *phrase);
+
+phrase_list_t *parse_paragraph(const char *phrase_strings);

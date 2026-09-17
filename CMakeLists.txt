@@ -3,6 +3,8 @@ project(palm-tree VERSION 0.1.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_C_COMPILER clang)
+
 add_compile_options(-Wall -Wextra)
 
 add_compile_options(-fsanitize=address)

@@ -112,3 +112,14 @@ bool utf8_should_ignore_char(const char *src,
 
     return false;
 }
+
+bool utf8_end_of_cn_phrase(const char *src) {
+    char buffer[4] = { 0 };
+    utf8_char_consume(src, buffer);
+    if (strncmp(buffer, "。", sizeof("。")) == 0) return true;
+    if (strncmp(buffer, "；", sizeof("；")) == 0) return true;
+    if (strncmp(buffer, "！", sizeof("！")) == 0) return true;
+    if (strncmp(buffer, "？", sizeof("？")) == 0) return true;
+
+    return false;
+}

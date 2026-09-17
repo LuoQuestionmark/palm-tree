@@ -318,3 +318,61 @@ void phrase_base_word_segmentation(phrase_t *phrase, dict_t *dict, int seg_c,
 
     seg_v[0] = seg;
 }
+
+phrase_list_t *phrase_list_init() {
+    phrase_list_t *ph_list = calloc(1, sizeof(phrase_list_t));
+    ph_list->size          = 1;
+    ph_list->count         = 0;
+    ph_list->phrases       = calloc(1, sizeof(phrase_t *));
+
+    return ph_list;
+}
+
+void phrase_list_free(phrase_list_t *ph_list) {
+    if (ph_list == NULL) return;
+    if (ph_list->phrases != NULL) {
+        for (int i = 0; i < ph_list->count; i++) {
+            phrase_free(ph_list->phrases[i]);
+        }
+        free(ph_list->phrases);
+    }
+    free(ph_list);
+}
+
+void phrase_list_append(phrase_list_t *ph_list, phrase_t *phrase) {
+    assert(ph_list && phrase);
+
+    if (ph_list->count == ph_list->size) {
+        ph_list->size *= 2;
+        ph_list->phrases =
+            realloc(ph_list->phrases, ph_list->size * sizeof(phrase_t *));
+    }
+
+    ph_list->phrases[ph_list->count++] = phrase;
+}
+
+phrase_list_t *parse_paragraph(const char *phrase_strings) {
+    if (phrase_strings == NULL) return NULL;
+
+    phrase_list_t *ph_list = phrase_list_init();
+
+    char buffer[PHRASE_BUFFER_SIZE] = { 0 };
+    char next[4];
+
+    for (const char *head = phrase_strings; head != NULL;
+         head             = utf8_char_consume(head, next)) {
+
+        if (utf8_should_ignore_char(next, UTF8_IGNORE_ALL)) {
+            continue;
+        }
+        if (utf8_end_of_cn_phrase(next)) {
+            strncat(buffer, next, sizeof(buffer) - strlen(buffer) - 1);
+            phrase_list_append(ph_list, phrase_init(buffer));
+            memset(buffer, 0, sizeof(buffer));
+        } else {
+            strncat(buffer, next, sizeof(buffer) - strlen(buffer) - 1);
+        }
+    }
+
+    return ph_list;
+}
