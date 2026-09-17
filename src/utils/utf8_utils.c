@@ -1,5 +1,6 @@
 #include "utils/utf8_utils.h"
 #include <assert.h>
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -74,14 +75,40 @@ bool utf8_char_load_n(const char *src, char *dst, size_t dst_size, int len) {
 }
 
 const char *utf8_char_consume(const char *src, char *utf8_char_buf) {
-    if (src == NULL || src[0] == '0') return NULL;
+    if (src == NULL || src[0] == '\0') return NULL;
+
+    memset(utf8_char_buf, 0, 4);
 
     int len = utf8_char_len(src);
-    if (len <= 0) return NULL;
+    if (len <= 0) {
+        return NULL;
+    }
 
     if (utf8_char_buf) {
         strncpy(utf8_char_buf, src, len);
     }
 
     return src + len;
+}
+
+bool utf8_should_ignore_char(const char *src,
+                             enum UTF8_IGNORE_OPTION ignore_option) {
+
+    if (src == NULL || src[0] == '\0') return false;
+    if (ignore_option & UTF8_IGNORE_SPACE) {
+        if (isblank(src[0])) return true;
+    }
+    if (ignore_option & UTF8_IGNORE_CONTROL_CHAR) {
+        if (iscntrl(src[0])) return true;
+    }
+    if (ignore_option & UTF8_IGNORE_SYMBOLS) {
+        if (src[0] == '=') return true;
+        if (src[0] == '/') return true;
+        if (src[0] == '\\') return true;
+        if (src[0] == '|') return true;
+        if (src[0] == '*') return true;
+        if (src[0] == '~') return true;
+    }
+
+    return false;
 }
