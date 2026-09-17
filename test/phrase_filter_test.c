@@ -2,9 +2,10 @@
 #include "phrase_filter.h"
 #include "utils/dict.h"
 #include "words.h"
+#include <assert.h>
 #include <stdlib.h>
 
-int main() {
+void test_one() {
     phrase_t *p = phrase_init("亚马逊苹果");
     segmentation_t seg;
     dict_t *dict = dict_init();
@@ -17,9 +18,29 @@ int main() {
                              PHRASE_DICT_FILTER_LONGEST);
 
     words_t *words = phrase_segment(p, &seg);
-    words_fprint(stdout, words);
+    assert(words->count == 2);
 
     words_free(words);
     dict_free(dict);
     phrase_free(p);
+}
+
+void test_two() {
+    phrase_t *p = phrase_init("一百三十二人");
+    segmentation_t seg;
+
+    phrase_filter_cardinal_number(p, &p->cn_char_seg, &seg);
+
+    words_t *words = phrase_segment(p, &seg);
+    words_fprint(stdout, words);
+    puts("");
+    assert(words->count == 2);
+
+    words_free(words);
+    phrase_free(p);
+}
+
+int main() {
+    test_one();
+    test_two();
 }

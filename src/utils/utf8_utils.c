@@ -72,3 +72,16 @@ bool utf8_char_load_n(const char *src, char *dst, size_t dst_size, int len) {
     strncpy(dst, src, tot_len);
     return true;
 }
+
+const char *utf8_char_consume(const char *src, char *utf8_char_buf) {
+    if (src == NULL || src[0] == '0') return NULL;
+
+    int len = utf8_char_len(src);
+    if (len <= 0) return NULL;
+
+    if (utf8_char_buf) {
+        strncpy(utf8_char_buf, src, len);
+    }
+
+    return src + len;
+}

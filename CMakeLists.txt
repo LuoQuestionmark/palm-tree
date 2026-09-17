@@ -17,6 +17,7 @@ add_executable(palm_tree
     src/phrase_filter.c
     src/utils/dict.c
     src/utils/utf8_utils.c
+    src/patterns/digits.c
 )
 
 
@@ -28,6 +29,7 @@ add_executable(segment_test
     src/phrase_filter.c
     src/utils/dict.c
     src/utils/utf8_utils.c
+    src/patterns/digits.c
 )
 add_test(
     NAME segment_test
@@ -40,6 +42,7 @@ add_executable(phrase_test
     src/phrase_filter.c
     src/utils/dict.c
     src/utils/utf8_utils.c
+    src/patterns/digits.c
 )
 add_test(
     NAME phrase_test
@@ -53,6 +56,7 @@ add_executable(phrase_filter_test
     src/utils/dict.c
     src/utils/utf8_utils.c
     src/words.c
+    src/patterns/digits.c
 )
 add_test(
     NAME phrase_filter_test
@@ -67,6 +71,7 @@ add_executable(words_test
     src/phrase_filter.c
     src/utils/dict.c
     src/utils/utf8_utils.c
+    src/patterns/digits.c
 )
 add_test(
     NAME words_test
@@ -81,4 +86,14 @@ add_test(
     NAME dict_test
     COMMAND dict_test
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
+add_executable(digits_test
+    test/digits_test.c
+    src/patterns/digits.c
+    src/utils/utf8_utils.c
+)
+add_test(
+    NAME digits_test
+    COMMAND digits_test
 )
