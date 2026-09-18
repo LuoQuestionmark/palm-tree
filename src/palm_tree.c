@@ -7,36 +7,36 @@
 #include <string.h>
 
 int main() {
-    FILE *file = fopen("resource/vimtutor.txt", "rb");
-    if (!file) {
-        perror("fopen");
-        exit(EXIT_FAILURE);
-    }
+    // FILE *file = fopen("resource/vimtutor.txt", "rb");
+    // if (!file) {
+    //     perror("fopen");
+    //     exit(EXIT_FAILURE);
+    // }
 
-    dict_t *dict = dict_init();
-    if (!dict_load_file(dict, "resource/cedict_ts.u8")) {
-        exit(EXIT_FAILURE);
-    }
+    // dict_t *dict = dict_init();
+    // if (!dict_load_file(dict, "resource/cedict_ts.u8")) {
+    //     exit(EXIT_FAILURE);
+    // }
 
-    char buffer[3000 * 4] = { 0 };
-    char chunk[1024]      = { 0 };
+    // char buffer[3000 * 4] = { 0 };
+    // char chunk[1024]      = { 0 };
 
-    while ((fgets(chunk, sizeof(chunk), file))) {
-        strncat(buffer, chunk, sizeof(buffer) - strlen(buffer) - 1);
-    }
-    fclose(file);
+    // while ((fgets(chunk, sizeof(chunk), file))) {
+    //     strncat(buffer, chunk, sizeof(buffer) - strlen(buffer) - 1);
+    // }
+    // fclose(file);
 
-    phrase_list_t *ph_list = parse_paragraph(buffer);
+    // phrase_list_t *ph_list = parse_paragraph(buffer);
 
-    for (int i = 0; i < ph_list->count; i++) {
-        phrase_t *p = ph_list->phrases[i];
-        segmentation_t seg;
-        phrase_filter_dict_words(p, &p->cn_char_seg, &seg, dict,
-                                 PHRASE_DICT_FILTER_LONGEST);
-        words_t *words = phrase_segment(p, &seg);
-        words_fprint(stdout, words);
-        words_free(words);
-    }
+    // for (int i = 0; i < ph_list->count; i++) {
+    //     phrase_t *p = ph_list->phrases[i];
+    //     segmentation_t seg;
+    //     phrase_filter_dict_words(p, &p->cn_char_seg, &seg, dict,
+    //                              PHRASE_DICT_FILTER_LONGEST);
+    //     words_t *words = phrase_segment(p, &seg);
+    //     words_fprint(stdout, words);
+    //     words_free(words);
+    // }
 
-    phrase_list_free(ph_list);
+    // phrase_list_free(ph_list);
 }

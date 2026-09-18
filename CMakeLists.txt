@@ -10,7 +10,10 @@ add_compile_options(-Wall -Wextra)
 add_compile_options(-fsanitize=address)
 add_link_options(-fsanitize=address)
 
+# add_compile_options(-pg)
+
 include_directories(include/)
+include_directories(extern/)
 
 add_executable(palm_tree
     src/palm_tree.c
@@ -98,4 +101,15 @@ add_executable(digits_test
 add_test(
     NAME digits_test
     COMMAND digits_test
+)
+
+add_executable(bloom_test
+    test/bloom_test.c
+    src/utils/bloom_filter.c
+    src/utils/utf8_utils.c
+    extern/lookup3.c
+)
+add_test(
+    NAME bloom_test
+    COMMAND bloom_test
 )

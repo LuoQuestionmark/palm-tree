@@ -40,7 +40,8 @@ bool dict_load_file(dict_t *dict, const char *filename) {
 }
 
 bool dict_exist(const dict_t *dict, const char *word) {
-    if (dict == NULL || !dict->loaded) return false;
+    assert(dict != NULL || dict->loaded);
+
     if (word == NULL || strlen(word) == 0) return false;
 
     bool ret = true;

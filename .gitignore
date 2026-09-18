@@ -3,5 +3,7 @@
 
 build
 
+gmon.out
+
 # personal note on development
 documents/dev_note.md
