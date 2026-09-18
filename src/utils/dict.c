@@ -69,11 +69,11 @@ bool dict_exist(const dict_t *dict, const char *word) {
     bool ret = true;
 
     char regex_pattern[128] = { 0 };
-    snprintf(regex_pattern, sizeof(regex_pattern), "^.*%s.*$", word);
+    snprintf(regex_pattern, sizeof(regex_pattern), "%s\n", word);
 
     regex_t regex;
 
-    if (regcomp(&regex, regex_pattern, REG_NOSUB) != 0) {
+    if (regcomp(&regex, regex_pattern, REG_NOSUB | REG_NEWLINE) != 0) {
         perror("regcomp");
         ret = false;
         goto reg_clean;

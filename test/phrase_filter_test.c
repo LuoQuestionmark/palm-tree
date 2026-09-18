@@ -37,8 +37,7 @@ void test_two() {
     char buffer[1024] = { 0 };
     words_snprint(buffer, sizeof(buffer), words);
 
-    assert(strncmp(buffer, "一百三十二<UNDEFINED> 人<UNDEFINED>",
-                   sizeof(buffer)) == 0);
+    assert(strncmp(buffer, "一百三十二<.> 人<.>", sizeof(buffer)) == 0);
     assert(words->count == 2);
 
     words_free(words);
@@ -56,8 +55,7 @@ void test_three() {
     char buffer[1024] = { 0 };
     words_snprint(buffer, sizeof(buffer), words);
 
-    assert(strncmp(buffer, "第九十九<UNDEFINED> 苹<UNDEFINED> 果<UNDEFINED>",
-                   sizeof(buffer)) == 0);
+    assert(strncmp(buffer, "第九十九<.> 苹<.> 果<.>", sizeof(buffer)) == 0);
     assert(words->count == 3);
 
     words_free(words);

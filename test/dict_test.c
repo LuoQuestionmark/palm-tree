@@ -58,6 +58,9 @@ int main() {
     if (dict_exist(dict, "键应")) {
         fprintf(stderr, "false positive \"键应\"\n");
     }
+    if (dict_exist(dict, "是一")) {
+        fprintf(stderr, "false positive \"是一\"\n");
+    }
 
 free_dict:
     dict_free(dict);
