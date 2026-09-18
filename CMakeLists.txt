@@ -20,9 +20,11 @@ add_executable(palm_tree
     src/phrase.c
     src/words.c
     src/phrase_filter.c
+    src/utils/bloom_filter.c
     src/utils/dict.c
     src/utils/utf8_utils.c
     src/patterns/digits.c
+    extern/lookup3.c
 )
 
 
@@ -32,9 +34,11 @@ add_executable(segment_test
     test/segment_test.c
     src/phrase.c
     src/phrase_filter.c
+    src/utils/bloom_filter.c
     src/utils/dict.c
     src/utils/utf8_utils.c
     src/patterns/digits.c
+    extern/lookup3.c
 )
 add_test(
     NAME segment_test
@@ -45,9 +49,11 @@ add_executable(phrase_test
     test/phrase_test.c
     src/phrase.c
     src/phrase_filter.c
+    src/utils/bloom_filter.c
     src/utils/dict.c
     src/utils/utf8_utils.c
     src/patterns/digits.c
+    extern/lookup3.c
 )
 add_test(
     NAME phrase_test
@@ -58,10 +64,12 @@ add_executable(phrase_filter_test
     test/phrase_filter_test.c
     src/phrase.c
     src/phrase_filter.c
+    src/utils/bloom_filter.c
     src/utils/dict.c
     src/utils/utf8_utils.c
     src/words.c
     src/patterns/digits.c
+    extern/lookup3.c
 )
 add_test(
     NAME phrase_filter_test
@@ -74,9 +82,11 @@ add_executable(words_test
     src/phrase.c
     src/words.c
     src/phrase_filter.c
+    src/utils/bloom_filter.c
     src/utils/dict.c
     src/utils/utf8_utils.c
     src/patterns/digits.c
+    extern/lookup3.c
 )
 add_test(
     NAME words_test
@@ -85,7 +95,10 @@ add_test(
 
 add_executable(dict_test
     test/dict_test.c
+    src/utils/bloom_filter.c
     src/utils/dict.c
+    src/utils/utf8_utils.c
+    extern/lookup3.c
 )
 add_test(
     NAME dict_test

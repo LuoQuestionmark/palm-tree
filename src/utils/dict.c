@@ -1,4 +1,5 @@
 #include "utils/dict.h"
+#include "utils/bloom_filter.h"
 #include <assert.h>
 #include <regex.h>
 #include <stdbool.h>
@@ -7,10 +8,18 @@
 #include <string.h>
 
 dict_t *dict_init() {
-    return calloc(1, sizeof(dict_t));
+    dict_t *dict       = calloc(1, sizeof(dict_t));
+    dict->bloom_filter = bloom_init();
+
+    return dict;
 }
 
 void dict_free(dict_t *dict) {
+    if (dict == NULL) return;
+    if (dict->bloom_filter) {
+        bloom_free(dict->bloom_filter);
+    }
+
     free(dict);
 }
 
@@ -35,15 +44,28 @@ bool dict_load_file(dict_t *dict, const char *filename) {
     dict->buffer[chunk_size] = '\0';
     dict->loaded             = true;
 
+    char line_buffer[1024];
+    rewind(file);
+    while (fgets(line_buffer, sizeof(line_buffer), file)) {
+        line_buffer[strlen(line_buffer) - 1] = '\0';
+        bloom_add(dict->bloom_filter, line_buffer);
+    }
+
     fclose(file);
     return true;
 }
 
 bool dict_exist(const dict_t *dict, const char *word) {
-    assert(dict != NULL || dict->loaded);
+    assert(dict != NULL);
+    assert(dict->loaded);
 
     if (word == NULL || strlen(word) == 0) return false;
 
+    if (!bloom_exist(dict->bloom_filter, word)) {
+        return false;
+    }
+
+    // comment out the old solution with regex matching, which is slow!
     bool ret = true;
 
     char regex_pattern[128] = { 0 };

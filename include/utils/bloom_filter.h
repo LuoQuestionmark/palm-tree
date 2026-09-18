@@ -3,9 +3,15 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define BLOOM_FILTER_BITS (1 << 30)
+#define BLOOM_FILTER_BYTES (BLOOM_FILTER_BITS >> 3)
+
+#define BLOOM_HASH_SEED1 42
+#define BLOOM_HASH_SEED2 451
+
 typedef struct bloom_filter bloom_filter_t;
 struct bloom_filter {
-    uint32_t filter_bits;
+    char *filter_bits;
 };
 
 bloom_filter_t *bloom_init();

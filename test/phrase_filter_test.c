@@ -11,7 +11,7 @@ void test_one() {
     segmentation_t seg;
     dict_t *dict = dict_init();
 
-    if (!dict_load_file(dict, "resource/cedict_ts.u8")) {
+    if (!dict_load_file(dict, "resource/dict.txt")) {
         exit(EXIT_FAILURE);
     }
 

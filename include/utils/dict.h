@@ -1,5 +1,6 @@
 #pragma once
 
+#include "utils/bloom_filter.h"
 #include <stdbool.h>
 
 #define MAX_DICT_BUFFER_SIZE (64 * 1024 * 1024)
@@ -7,6 +8,7 @@
 typedef struct dict dict_t;
 struct dict {
     bool loaded;
+    bloom_filter_t *bloom_filter;
     char buffer[MAX_DICT_BUFFER_SIZE];
 };
 
