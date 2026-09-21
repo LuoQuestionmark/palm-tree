@@ -110,6 +110,15 @@ void segmentation_del(segmentation_t *segmentation, const int offset) {
     segmentation->seg[seg_offset] &= ~(SEG_0 >> seg_reminder);
 }
 
+void segmentation_del_n(segmentation_t *segmentation, const int offset, int n) {
+    assert(segmentation);
+    assert(offset > 0);
+
+    for (int i = 0; i < n; i++) {
+        segmentation_del(segmentation, offset + i);
+    }
+}
+
 void segmentation_pop(segmentation_t *segmentation, const int offset) {
     assert(segmentation);
     assert(offset >= 0 && offset < MAX_SEGMENTATION_BYTE);

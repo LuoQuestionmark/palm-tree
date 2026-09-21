@@ -3,8 +3,8 @@
 
 int main() {
     assert(is_ascii_digits("12345") == 5);
-    assert(is_cn_fw_digits("１２３") == 3);
-    assert(is_cn_char_digits("九百八十二") == 5);
+    assert(is_cn_fw_digits("１２３") == 9);
+    assert(is_cn_char_digits("九百八十二") == 15);
     assert(is_ordinal_cn_char_digits("九百八十二") == -1);
-    assert(is_ordinal_cn_char_digits("第九百八十二") == 6);
+    assert(is_ordinal_cn_char_digits("第九百八十二") == 18);
 }

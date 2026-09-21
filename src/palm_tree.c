@@ -31,10 +31,15 @@ int main() {
     for (int i = 0; i < ph_list->count; i++) {
         phrase_t *p = ph_list->phrases[i];
         segmentation_t seg;
-        phrase_filter_dict_words(p, &p->cn_char_seg, &seg, dict,
+
+        phrase_filter_ordinal_number(p, &p->cn_char_seg, &seg);
+        phrase_filter_cardinal_number(p, &seg, &seg);
+        phrase_filter_dict_words(p, &seg, &seg, dict,
                                  PHRASE_DICT_FILTER_LONGEST);
+
         words_t *words = phrase_segment(p, &seg);
         words_fprint(stdout, words);
+        puts("");
         words_free(words);
     }
 

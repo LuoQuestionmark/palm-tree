@@ -7,6 +7,25 @@
 #include <stdlib.h>
 #include <string.h>
 
+static void regex_sanitize(const char *src, char *dst, size_t len) {
+    assert(src);
+    assert(dst && len > 0);
+
+    static const char special_chars[] = { '#', '.', '[', ']', '{', '}',
+                                          '^', '?', '+', '|', '*' };
+
+    memset(dst, 0, len);
+    for (size_t i = 0, j = 0; i < strlen(src) && j < len; i++, j++) {
+        for (size_t k = 0; k < sizeof(special_chars); k++) {
+            if (src[i] == special_chars[k]) {
+                dst[j++] = '\\';
+                break;
+            }
+        }
+        dst[j] = src[i];
+    }
+}
+
 dict_t *dict_init() {
     dict_t *dict       = calloc(1, sizeof(dict_t));
     dict->bloom_filter = bloom_init();
@@ -68,8 +87,11 @@ bool dict_exist(const dict_t *dict, const char *word) {
     // comment out the old solution with regex matching, which is slow!
     bool ret = true;
 
-    char regex_pattern[128] = { 0 };
-    snprintf(regex_pattern, sizeof(regex_pattern), "%s\n", word);
+    char word_sanitized[1024];
+    regex_sanitize(word, word_sanitized, sizeof(word_sanitized));
+
+    char regex_pattern[1024] = { 0 };
+    snprintf(regex_pattern, sizeof(regex_pattern), "^%s\n", word_sanitized);
 
     regex_t regex;
 

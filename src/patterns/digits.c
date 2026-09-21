@@ -1,6 +1,5 @@
 #include "patterns/digits.h"
 #include "utils/utf8_utils.h"
-#include <ctype.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -33,11 +32,22 @@ static bool is_cn_char_digit(const char *utf8_char) {
 int is_ascii_digits(const char *utf8_string) {
     if (utf8_string == NULL) return -1;
 
+    bool has_decimal_separator = false;
+
     int len = 0;
     for (int offset = 0; true; offset++) {
         char current = utf8_string[offset];
-        if (!isdigit(current)) break;
-        len += 1;
+        if (current >= '0' && current <= '9') {
+            len += utf8_char_len(utf8_string + offset);
+            continue;
+        }
+        if (current == '.' && offset != 0 && !has_decimal_separator) {
+            // TODO: fix when "." is the last char, e.g. "1."
+            has_decimal_separator = true;
+            len += utf8_char_len(utf8_string + offset);
+            continue;
+        }
+        break;
     }
     return len;
 }
@@ -52,7 +62,7 @@ int is_cn_fw_digits(const char *utf8_string) {
         head = utf8_char_consume(head, current);
         if (head == NULL) break;
         if (!is_cn_fw_digit(current)) break;
-        len += 1;
+        len += utf8_char_len(current);
     }
     return len;
 }
@@ -71,39 +81,39 @@ int is_cn_char_digits(const char *utf8_string) {
         if (head == NULL) break;
 
         if (is_cn_char_digit(current)) {
-            len += 1;
+            len += utf8_char_len(current);
             continue;
         }
 
         if (special_allow[0] && strncmp(current, "亿", sizeof("亿")) == 0) {
             special_allow[0] = false;
             memset(special_allow + 1, true, 4 * sizeof(bool));
-            len += 1;
+            len += utf8_char_len(current);
             continue;
         }
 
         if (special_allow[1] && strncmp(current, "万", sizeof("万")) == 0) {
             special_allow[1] = false;
             memset(special_allow + 2, true, 3 * sizeof(bool));
-            len += 1;
+            len += utf8_char_len(current);
             continue;
         }
 
         if (special_allow[2] && strncmp(current, "千", sizeof("千")) == 0) {
             special_allow[2] = false;
-            len += 1;
+            len += utf8_char_len(current);
             continue;
         }
 
         if (special_allow[3] && strncmp(current, "百", sizeof("百")) == 0) {
             special_allow[3] = false;
-            len += 1;
+            len += utf8_char_len(current);
             continue;
         }
 
         if (special_allow[4] && strncmp(current, "十", sizeof("十")) == 0) {
             special_allow[4] = false;
-            len += 1;
+            len += utf8_char_len(current);
             continue;
         }
 
@@ -120,7 +130,10 @@ int is_ordinal_cn_char_digits(const char *utf8_string) {
     }
 
     int len = is_cn_char_digits(next);
-    if (len > 0) return len + 1;
+    if (len > 0) {
+        // minus one since static char end with '\0', which takes one extra byte
+        return len + sizeof("第") - 1;
+    }
 
     return -1;
 }

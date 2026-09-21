@@ -4,6 +4,7 @@
 #include "utils/dict.h"
 #include "utils/utf8_utils.h"
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -32,9 +33,9 @@ static void phrase_filter_dict_longest(phrase_t *phrase, dict_t *dict,
 
             if (!dict_exist(dict, buffer)) continue;
 
-            // if a word consisting j utf8 detected at given offset, then set
-            // the next (j - 1) segmentation point to zero
-            segmentation_pop_n(seg, offset + 1, (j - 1));
+            // printf("dict match: %s\n", buffer);
+
+            segmentation_del_n(seg, offset + 1, strlen(buffer) - 1);
 
             break;
         }
@@ -79,7 +80,7 @@ void phrase_filter_ordinal_number(phrase_t *phrase,
 
         digits_cn_char_count = is_ordinal_cn_char_digits(current);
         if (digits_cn_char_count > 0) {
-            segmentation_pop_n(seg_out, offset + 1, (digits_cn_char_count - 1));
+            segmentation_del_n(seg_out, offset + 1, (digits_cn_char_count - 1));
             continue;
         }
     }
@@ -106,19 +107,19 @@ void phrase_filter_cardinal_number(phrase_t *phrase,
 
         digits_cn_char_count = is_ascii_digits(current);
         if (digits_cn_char_count > 0) {
-            segmentation_pop_n(seg_out, offset + 1, (digits_cn_char_count - 1));
+            segmentation_del_n(seg_out, offset + 1, (digits_cn_char_count - 1));
             continue;
         }
 
         digits_cn_char_count = is_cn_char_digits(current);
         if (digits_cn_char_count > 0) {
-            segmentation_pop_n(seg_out, offset + 1, (digits_cn_char_count - 1));
+            segmentation_del_n(seg_out, offset + 1, (digits_cn_char_count - 1));
             continue;
         }
 
         digits_cn_char_count = is_cn_fw_digits(current);
         if (digits_cn_char_count > 0) {
-            segmentation_pop_n(seg_out, offset + 1, (digits_cn_char_count - 1));
+            segmentation_del_n(seg_out, offset + 1, (digits_cn_char_count - 1));
             continue;
         }
     }
