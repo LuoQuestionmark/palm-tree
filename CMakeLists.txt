@@ -15,30 +15,42 @@ add_link_options(-fsanitize=address)
 include_directories(include/)
 include_directories(extern/)
 
-add_executable(palm_tree
-    src/palm_tree.c
+add_library(palm_patterns
+    src/patterns/digits.c
+    src/patterns/latin.c
+    src/utils/utf8_utils.c
+)
+
+add_library(palm_phrase
     src/phrase.c
-    src/words.c
     src/phrase_filter.c
     src/utils/bloom_filter.c
     src/utils/dict.c
     src/utils/utf8_utils.c
-    src/patterns/digits.c
+    src/words.c
     extern/lookup3.c
 )
+target_link_libraries(palm_phrase
+    palm_patterns
+)
 
+add_executable(palm_tree
+    src/palm_tree.c
+    src/words.c
+)
+target_link_libraries(palm_tree PRIVATE
+    palm_phrase
+    palm_patterns
+)
 
 enable_testing()
 
 add_executable(segment_test
     test/segment_test.c
-    src/phrase.c
-    src/phrase_filter.c
-    src/utils/bloom_filter.c
-    src/utils/dict.c
-    src/utils/utf8_utils.c
-    src/patterns/digits.c
-    extern/lookup3.c
+)
+target_link_libraries(segment_test PRIVATE
+    palm_phrase
+    palm_patterns
 )
 add_test(
     NAME segment_test
@@ -47,13 +59,10 @@ add_test(
 
 add_executable(phrase_test
     test/phrase_test.c
-    src/phrase.c
-    src/phrase_filter.c
-    src/utils/bloom_filter.c
-    src/utils/dict.c
-    src/utils/utf8_utils.c
-    src/patterns/digits.c
-    extern/lookup3.c
+)
+target_link_libraries(phrase_test PRIVATE
+    palm_phrase
+    palm_patterns
 )
 add_test(
     NAME phrase_test
@@ -62,14 +71,10 @@ add_test(
 
 add_executable(phrase_filter_test
     test/phrase_filter_test.c
-    src/phrase.c
-    src/phrase_filter.c
-    src/utils/bloom_filter.c
-    src/utils/dict.c
-    src/utils/utf8_utils.c
-    src/words.c
-    src/patterns/digits.c
-    extern/lookup3.c
+)
+target_link_libraries(phrase_filter_test PRIVATE
+    palm_phrase
+    palm_patterns
 )
 add_test(
     NAME phrase_filter_test
@@ -87,6 +92,9 @@ add_executable(words_test
     src/utils/utf8_utils.c
     src/patterns/digits.c
     extern/lookup3.c
+)
+target_link_libraries(words_test PRIVATE
+    palm_patterns
 )
 add_test(
     NAME words_test
@@ -114,6 +122,16 @@ add_executable(digits_test
 add_test(
     NAME digits_test
     COMMAND digits_test
+)
+
+add_executable(latin_test
+    test/latin_test.c
+    src/patterns/latin.c
+    src/utils/utf8_utils.c
+)
+add_test(
+    NAME latin_test
+    COMMAND latin_test
 )
 
 add_executable(bloom_test

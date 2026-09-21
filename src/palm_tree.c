@@ -34,6 +34,7 @@ int main() {
 
         phrase_filter_ordinal_number(p, &p->cn_char_seg, &seg);
         phrase_filter_cardinal_number(p, &seg, &seg);
+        phrase_filter_latin(p, &seg, &seg);
         phrase_filter_dict_words(p, &seg, &seg, dict,
                                  PHRASE_DICT_FILTER_LONGEST);
 
