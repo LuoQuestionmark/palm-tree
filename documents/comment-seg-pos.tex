@@ -1,0 +1,43 @@
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+
+\title{Comment on Chinese Segmentation and Part of Speech(POS) Tagging}
+\author{Wenhao LUO}
+
+\begin{document}
+\maketitle
+
+\section*{Disclaimer}
+
+\par I am not a researcher, and specially not a researcher of this domain. This document serves as a side note of my personal project. Anyone who read this should take it with a grain of salt.
+
+\section{Introduction}
+
+\par Part of Speech (POS) Tagging is to ``finding the lexical categories associated with words''\cite{kornai2019semantics}. For a language like Chinese, this task requires a clear segmentation of words, as Chinese does not provide notations that mark the start of end of each word. Chinese Segmentation is a subject of research that have been researched for decades. Methods such as conditional random fields\cite{peng2004chinese}, LSTM\cite{ma2018state} are used to perform such task.
+
+\par It is worth noting, that Chinese segmentation and Chinese POS tagging are not two independent tasks. Occasionally, multiple segmentations are valid for a single phrase. It depends on information of the syntax, even semantic knowledge to distinguish these segmentations. This fact is partially reflected by the Chinese segmentation guidelines, which will be further discussed later. These segmentation guidelines are often based on lexical categories of words, which are marked by the POS tagging process.
+
+\par This repository serves as a project to perform the segmentation and POS tagging tasks on Chinese. It does not aim to outperform models that being published as research result, rather a home-made model of personal interest. Despite the nature of this project, datasets, specially opensource datasets are still needed for this project. This article is the comments and notes I made during the search of proper datasets. The use of \LaTeX \ format makes it easier to track and cite articles.
+
+\section{Guidelines and Dataset}
+
+\par Multiple segmentation guidelines exist. The site of \href{http://sighan.cs.uchicago.edu/bakeoff2005/}{The Second International Chinese Word Segmentation Bakeoff} provide four (practically three, as the one from Microsoft Research did not provide much information) segmentation guidelines. \href{https://verbs.colorado.edu/chinese/ctb.html}{The Penn - CU Chinese Treebank Project} also has its own segmentation guidelines\cite{xia2000segmentation}.
+
+\par Although these guidelines are all public available, corresponding POS tagging corpus are not openly available. Article by Ma et als. \cite{ma2018state} compared their with following datasets:
+
+\begin{enumerate}
+    \item Chinese Penn Treebank 6.0;
+    \item Chinese Penn Treebank 7.0;
+    \item Chinese Universal Treebank (UD) from the Conll2017 shared task;
+    \item Dataset from SIGHAN 2005 bake-off task.
+\end{enumerate}
+
+\par Among these datasets, Chinese Penn Treebank datasets do not provide free access. Chinese Universal Treebank (UD) can be found on \href{https://github.com/UniversalDependencies/UD_Chinese-GSD}{GitHub}\footnote{Project contains repositories, I linked only one of them}. Dataset from SIGHAN 2005 bake-off task can be found on \url{http://sighan.cs.uchicago.edu/bakeoff2005/}; however without POS tagging data.
+
+\par Due to the nature of this project (with no fund at all), sticking on the Chinese Universal Treebank seems to be the best option. The project is available \href{https://universaldependencies.org/zh/index.html}{here}. Interesting enough, UD corpus format \href{https://universaldependencies.org/format.html}{CoNLL-U Format} does contain the POS Tagging of Chinese Treebank format alongside its own POS tags.
+
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}

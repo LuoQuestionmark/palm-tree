@@ -1,0 +1,12 @@
+This is a tempory note tracking extern resources used in this project. A proper
+list will be created later on.
+
+- cedict_ts.u8: dictionary from cedict, CC 4.0
+- dict.txt: dictionary stripped from cedict, only with the presence of SC words
+- vimtutor.txt: the start of `vimtutor zh`, vim tutorial in Chinese
+- zh_gsd-ud-train.conllu, fetch from
+  https://github.com/UniversalDependencies/UD_Chinese-GSD, CC 4.0
+
+A part from this, ../extern contains lookup.c:
+
+> lookup3.c, by Bob Jenkins, May 2006, Public Domain.

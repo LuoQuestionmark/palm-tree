@@ -1,0 +1,23 @@
+\begin{thebibliography}{1}
+
+\bibitem{kornai2019semantics}
+A.~Kornai.
+\newblock {\em Semantics}.
+\newblock Computer Science. Springer International Publishing, 2019.
+
+\bibitem{ma2018state}
+Ji~Ma, Kuzman Ganchev, and David Weiss.
+\newblock State-of-the-art chinese word segmentation with bi-lstms.
+\newblock In {\em Proceedings of the 2018 conference on empirical methods in natural language processing}, pages 4902--4908, 2018.
+
+\bibitem{peng2004chinese}
+Fuchun Peng, Fangfang Feng, and Andrew McCallum.
+\newblock Chinese segmentation and new word detection using conditional random fields.
+\newblock In {\em COLING 2004: Proceedings of the 20th International Conference on Computational Linguistics}, pages 562--568, 2004.
+
+\bibitem{xia2000segmentation}
+Fei Xia.
+\newblock The segmentation guidelines for the penn chinese treebank (3.0).
+\newblock 2000.
+
+\end{thebibliography}
