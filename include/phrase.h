@@ -1,5 +1,5 @@
 #pragma once
-#include "utils/dict.h"
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -65,11 +65,6 @@ void phrase_snprint(const phrase_t *phrase, enum phrase_snprint_type print_type,
 // generate utf8 char segmentation (saved in `phrase_t->cn_char_seg`), return
 // True if such segmentation is possible
 bool phrase_utf8_char_segmentation(phrase_t *phrase);
-
-// generate `seg_c` count (of less) of best segmentation, save value to `seg_v`,
-// save the best segmentation to `phrase_t` (`phrase_t->word_seg`)
-void phrase_base_word_segmentation(phrase_t *phrase, dict_t *dict, int seg_c,
-                                   segmentation_t *seg_v[seg_c]);
 
 phrase_list_t *phrase_list_init();
 void phrase_list_free(phrase_list_t *ph_list);

@@ -7,17 +7,9 @@
 
 const char *POS_TAG_str(enum POS_TAG pt) {
     switch (pt) {
-    case POS_TAG_UNDEFINED:
+    case POS_TAG_NULL:
         // return "UNDEFINED";
         return ".";
-    case POS_TAG_AD:
-        return "AD";
-    case POS_TAG_CD:
-        return "CD";
-    case POS_TAG_NN:
-        return "NN";
-    case POS_TAG_VV:
-        return "VV";
     default:
         // implementation needed
         return "UNIMPLEMENTED! Check source code";

@@ -1,11 +1,12 @@
 #include "utils/dict.h"
+#include "words.h"
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-int main() {
+int test1() {
     int ret = 0;
 
     dict_t *dict = dict_init();
@@ -66,4 +67,68 @@ free_dict:
     dict_free(dict);
 
     return ret;
+}
+
+void test2() {
+    wc_cell_t *word_list = wc_list_init();
+    assert(word_list);
+    assert(wc_list_count(word_list) == 0);
+
+    wc_list_append(word_list, "abc", POS_TAG_NOUN);
+    assert(wc_list_count(word_list) == 1);
+
+    wc_list_append(word_list, "abc", POS_TAG_VERB);
+    assert(wc_list_count(word_list) == 1);
+
+    wc_list_append(word_list, "def", POS_TAG_VERB);
+    assert(wc_list_count(word_list) == 2);
+
+    wc_list_free(word_list, true);
+}
+
+void test3() {
+    wc_hashtable_t *table = wc_hashtable_init();
+
+    wc_hashtable_append(table, "abc", POS_TAG_NOUN);
+    wc_hashtable_append(table, "abc", POS_TAG_VERB);
+    wc_hashtable_append(table, "def", POS_TAG_VERB);
+
+    int postag1 = wc_hashtable_get(table, "abc");
+    int postag2 = wc_hashtable_get(table, "def");
+
+    assert(postag1 & POS_TAG_NOUN);
+    assert(postag2 & POS_TAG_VERB);
+
+    assert((postag1 & POS_TAG_AUX) == 0);
+
+    wc_hashtable_free(table);
+}
+
+void test4() {
+    wc_hashtable_t *table = wc_hashtable_init();
+
+    wc_hashtable_append(table, "abc", POS_TAG_NOUN);
+    wc_hashtable_append(table, "abc", POS_TAG_VERB);
+    wc_hashtable_append(table, "def", POS_TAG_VERB);
+    wc_hashtable_append(table, "ghi", POS_TAG_VERB);
+
+    int postag1 = wc_hashtable_get(table, "abc");
+    int postag2 = wc_hashtable_get(table, "def");
+
+    wc_hashtable_resize(table);
+    wc_hashtable_resize(table);
+
+    assert(postag1 & POS_TAG_NOUN);
+    assert(postag2 & POS_TAG_VERB);
+
+    assert((postag1 & POS_TAG_AUX) == 0);
+
+    wc_hashtable_free(table);
+}
+
+int main() {
+    assert(test1() == 0);
+    test2();
+    test3();
+    test4();
 }

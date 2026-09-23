@@ -17,8 +17,8 @@ int main() {
     assert(strcmp(words->word_strings[0], "测试") == 0);
     assert(strcmp(words->word_strings[1], "句子") == 0);
 
-    words->pos_tags[0] = POS_TAG_VV;
-    words->pos_tags[1] = POS_TAG_NN;
+    words->pos_tags[0] = POS_TAG_VERB;
+    words->pos_tags[1] = POS_TAG_NOUN;
 
     char buffer[1024] = { 0 };
     FILE *buffer_ptr  = fmemopen(buffer, sizeof(buffer), "w");

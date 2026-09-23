@@ -312,22 +312,6 @@ bool phrase_utf8_char_segmentation(phrase_t *phrase) {
     return true;
 }
 
-void phrase_base_word_segmentation(phrase_t *phrase, dict_t *dict, int seg_c,
-                                   segmentation_t *seg_v[seg_c]) {
-    assert(phrase && dict);
-    if (seg_v == NULL) return;
-    if (seg_c < 1) return;
-
-    // TODO: complete filter process
-
-    segmentation_t *seg = calloc(1, sizeof(segmentation_t));
-
-    phrase_filter_dict_words(phrase, &phrase->cn_char_seg, seg, dict,
-                             PHRASE_DICT_FILTER_LONGEST);
-
-    seg_v[0] = seg;
-}
-
 phrase_list_t *phrase_list_init() {
     phrase_list_t *ph_list = calloc(1, sizeof(phrase_list_t));
     ph_list->size          = 1;

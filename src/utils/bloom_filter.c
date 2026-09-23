@@ -1,6 +1,5 @@
 #include "utils/bloom_filter.h"
 #include "lookup3.h"
-#include "utils/utf8_utils.h"
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>

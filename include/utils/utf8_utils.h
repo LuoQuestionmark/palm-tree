@@ -3,6 +3,7 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 enum UTF8_IGNORE_OPTION {
     UTF8_IGNORE_EMPTY        = 0b0,

@@ -1,8 +1,11 @@
 #include "utils/dict.h"
+#include "lookup3.h"
 #include "utils/bloom_filter.h"
+#include "words.h"
 #include <assert.h>
 #include <regex.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,6 +27,38 @@ static void regex_sanitize(const char *src, char *dst, size_t len) {
         }
         dst[j] = src[i];
     }
+}
+
+static void wc_list_raw_append(wc_cell_t *wc_list, char *word, int postags) {
+    assert(wc_list);
+    assert(word);
+
+    wc_cell_t *current;
+    for (current = wc_list; current->next != NULL; current = current->next) {
+        if (current->word == NULL) break;
+    }
+    // post condition: (current->next == NULL) or (current->word == NULL)
+
+    if (current->word == NULL) {
+        current->word            = word;
+        current->word_categories = postags;
+        return;
+    }
+    // post condition: (current->word != NULL) and (current->next = NULL)
+
+    current->next                  = wc_list_init();
+    current->next->word            = word;
+    current->next->word_categories = postags;
+    return;
+}
+
+static void wc_hashtable_rehash(int width, wc_cell_t **raw_table, char *word,
+                                int postags) {
+    int index = hashlittle(word, strlen(word), HASH_SEED);
+    if (raw_table[index % width] == NULL) {
+        raw_table[index % width] = wc_list_init();
+    }
+    wc_list_raw_append(raw_table[index % width], word, postags);
 }
 
 dict_t *dict_init() {
@@ -110,4 +145,187 @@ bool dict_exist(const dict_t *dict, const char *word) {
 reg_clean:
     regfree(&regex);
     return ret;
+}
+
+wc_cell_t *wc_list_init() {
+    return calloc(1, sizeof(wc_cell_t));
+}
+
+void wc_list_free(wc_cell_t *wc_list, bool free_word) {
+    if (wc_list == NULL) return;
+
+    if (free_word && wc_list->word) {
+        free(wc_list->word);
+    }
+
+    if (wc_list->next) {
+        wc_list_free(wc_list->next, free_word);
+    }
+    free(wc_list);
+}
+
+int wc_list_count(wc_cell_t *wc_list) {
+    if (wc_list == NULL) return -1;
+
+    int count = 0;
+    for (wc_cell_t *current = wc_list; current != NULL;
+         current            = current->next) {
+        if (current->word) {
+            count += 1;
+        }
+    }
+
+    return count;
+}
+
+void wc_list_append(wc_cell_t *wc_list, const char *word, enum POS_TAG postag) {
+    assert(wc_list);
+    assert(word);
+    assert(postag != POS_TAG_NULL);
+
+    wc_cell_t *current;
+    for (current = wc_list; current->next != NULL; current = current->next) {
+        // case 1: current is a cell with no word
+        if (current->word == NULL) break;
+
+        // case 2: current is a cell with the exact word, and next is not null
+        if (strncpy(current->word, word, strlen(current->word)) == 0) {
+            current->word_categories |= postag;
+            return;
+        }
+    }
+
+    // case 3: next is NULL and current cell is empty
+    if (current->word == NULL) {
+        current->word            = strdup(word);
+        current->word_categories = postag;
+        return;
+    }
+
+    // case 4: next is NULL but current cell is the exact word
+    if (strncmp(current->word, word, strlen(current->word)) == 0) {
+        current->word_categories |= postag;
+        return;
+    }
+
+    // case 5: next is NULL, current is neither NULL nor the exact word
+    current->next                  = wc_list_init();
+    current->next->word            = strdup(word);
+    current->next->word_categories = postag;
+    return;
+}
+
+int32_t wc_list_get(wc_cell_t *wc_list, const char *word) {
+    assert(word);
+    if (wc_list == NULL) return 0;
+
+    // this function's ret value is specified with int32 type, as the word
+    // categories is of such length (bit array of enum). moreover, the value 0
+    // is exact the "NULL" word category, a.k.a. "not found"
+
+    int32_t ret = 0;
+
+    for (wc_cell_t *current = wc_list; current != NULL;
+         current            = current->next) {
+        if (!current->word) continue;
+
+        if (strncmp(current->word, word, strlen(current->word)) == 0) {
+            ret = current->word_categories;
+            break;
+        }
+    }
+
+    return ret;
+}
+
+wc_hashtable_t *wc_hashtable_init() {
+    wc_hashtable_t *hashtable = calloc(1, sizeof(wc_hashtable_t));
+
+    hashtable->hashtable_width = WC_HASHTABLE_DEFAULT_WIDTH;
+    hashtable->hashtable =
+        calloc(WC_HASHTABLE_DEFAULT_WIDTH, sizeof(wc_cell_t *));
+
+    return hashtable;
+}
+
+void wc_hashtable_free(wc_hashtable_t *hashtable) {
+    if (hashtable == NULL) return;
+
+    assert(hashtable->hashtable);
+    for (int i = 0; i < hashtable->hashtable_width; i++) {
+        if (hashtable->hashtable[i] == NULL) continue;
+
+        wc_list_free(hashtable->hashtable[i], true);
+    }
+    free(hashtable->hashtable);
+
+    free(hashtable);
+}
+
+// double the width
+wc_hashtable_t *wc_hashtable_resize(wc_hashtable_t *hashtable) {
+    assert(hashtable);
+
+    int new_width         = 2 * hashtable->hashtable_width;
+    wc_cell_t **new_table = calloc(new_width, sizeof(wc_cell_t *));
+
+    for (int i = 0; i < hashtable->hashtable_width; i++) {
+        if (hashtable->hashtable[i] == NULL) continue;
+        wc_cell_t *current = hashtable->hashtable[i];
+        while (true) {
+            wc_hashtable_rehash(new_width, new_table, current->word,
+                                current->word_categories);
+
+            if (current->next == NULL) break;
+            current = current->next;
+        }
+    }
+
+    for (int i = 0; i < hashtable->hashtable_width; i++) {
+        if (hashtable->hashtable[i] == NULL) continue;
+        // during this operation, no word string is freed, since they are
+        // "moved" directly to the new table, when the hashtable is finally
+        // freed, all strings will be freed eventually
+        wc_list_free(hashtable->hashtable[i], false);
+    }
+    free(hashtable->hashtable);
+
+    hashtable->hashtable_width = new_width;
+    hashtable->hashtable       = new_table;
+
+    return hashtable;
+}
+
+void wc_hashtable_append(wc_hashtable_t *hashtable, const char *word,
+                         enum POS_TAG postag) {
+    assert(hashtable);
+    assert(word);
+
+    int index = hashlittle(word, strlen(word), HASH_SEED);
+    if (wc_list_count(
+            hashtable->hashtable[index % hashtable->hashtable_width]) >
+        WC_HASHTABLE_MAX_LENGTH) {
+        wc_hashtable_resize(hashtable);
+
+        // TODO: under extreme situation, it is possible to trigger resize each
+        // time a new member is added
+    }
+
+    if (hashtable->hashtable[index % hashtable->hashtable_width] == NULL) {
+        hashtable->hashtable[index % hashtable->hashtable_width] =
+            wc_list_init();
+    }
+    wc_list_append(hashtable->hashtable[index % hashtable->hashtable_width],
+                   word, postag);
+}
+
+int32_t wc_hashtable_get(const wc_hashtable_t *hashtable, const char *word) {
+    assert(hashtable);
+    assert(word);
+
+    int index = hashlittle(word, strlen(word), HASH_SEED);
+
+    int val = wc_list_get(
+        hashtable->hashtable[index % hashtable->hashtable_width], word);
+    return val;
 }
