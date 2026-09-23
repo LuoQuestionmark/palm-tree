@@ -5,16 +5,30 @@
 #include <stdlib.h>
 #include <string.h>
 
+const char POS_TAG_literals[][5] = { "ADJ",  "ADV",  "INTJ", "NOUN",  "PROPN",
+                                     "VERB", "ADP",  "AUX",  "CCONJ", "DET",
+                                     "NUM",  "PART", "PRON", "SCONJ", "PUNCT",
+                                     "SYM",  "X" };
+
 const char *POS_TAG_str(enum POS_TAG pt) {
-    switch (pt) {
-    case POS_TAG_NULL:
-        // return "UNDEFINED";
-        return ".";
-    default:
-        // implementation needed
-        return "UNIMPLEMENTED! Check source code";
+    if (pt == POS_TAG_NULL) return "";
+    for (size_t i = 0;
+         i < sizeof(POS_TAG_literals) / sizeof(POS_TAG_literals[0]); i++) {
+        if (pt == (1 << i)) return POS_TAG_literals[i];
     }
     return NULL;
+}
+
+enum POS_TAG POS_TAG_parse(const char *str) {
+    for (size_t i = 0;
+         i < sizeof(POS_TAG_literals) / sizeof(POS_TAG_literals[0]); i++) {
+        if (strncmp(POS_TAG_literals[i], str, strlen(POS_TAG_literals[i])) ==
+            0) {
+            return (enum POS_TAG)(1 << i);
+        }
+    }
+
+    return POS_TAG_NULL;
 }
 
 words_t *phrase_segment(phrase_t *phrase, segmentation_t *segmentation) {

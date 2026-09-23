@@ -40,6 +40,7 @@ struct words {
 };
 
 const char *POS_TAG_str(enum POS_TAG pt);
+enum POS_TAG POS_TAG_parse(const char *str);
 
 words_t *phrase_segment(phrase_t *phrase, segmentation_t *segmentation);
 void words_free(words_t *words);

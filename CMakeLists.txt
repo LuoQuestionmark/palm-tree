@@ -34,6 +34,15 @@ target_link_libraries(palm_phrase
     palm_patterns
 )
 
+add_library(palm_postag
+    src/postag/postag.c
+    src/utils/dict.c
+    src/words.c
+)
+target_link_libraries(palm_postag
+    palm_phrase
+)
+
 add_executable(palm_tree
     src/palm_tree.c
     src/words.c
@@ -41,6 +50,7 @@ add_executable(palm_tree
 target_link_libraries(palm_tree PRIVATE
     palm_phrase
     palm_patterns
+    palm_postag
 )
 
 enable_testing()
@@ -103,10 +113,14 @@ add_test(
 
 add_executable(dict_test
     test/dict_test.c
+    src/words.c
     src/utils/bloom_filter.c
     src/utils/dict.c
     src/utils/utf8_utils.c
     extern/lookup3.c
+)
+target_link_libraries(dict_test PRIVATE
+    palm_phrase
 )
 add_test(
     NAME dict_test

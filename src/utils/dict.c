@@ -1,6 +1,7 @@
 #include "utils/dict.h"
 #include "lookup3.h"
 #include "utils/bloom_filter.h"
+#include "utils/utf8_utils.h"
 #include "words.h"
 #include <assert.h>
 #include <regex.h>
@@ -9,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/param.h>
 
 static void regex_sanitize(const char *src, char *dst, size_t len) {
     assert(src);
@@ -52,9 +54,22 @@ static void wc_list_raw_append(wc_cell_t *wc_list, char *word, int postags) {
     return;
 }
 
+static uint32_t wc_hash(const char *word) {
+    char buffer[256] = { 0 };
+    strncpy(buffer, word, sizeof(buffer));
+
+    uint32_t index =
+        hashlittle(buffer, (strlen(buffer) / 4 + 1) * 4, HASH_SEED);
+
+    // for (size_t i = 0; i < strlen(word); i++) {
+    //     index = hashlittle(word + i, 1, index);
+    // }
+    return index;
+}
+
 static void wc_hashtable_rehash(int width, wc_cell_t **raw_table, char *word,
                                 int postags) {
-    int index = hashlittle(word, strlen(word), HASH_SEED);
+    uint32_t index = wc_hash(word);
     if (raw_table[index % width] == NULL) {
         raw_table[index % width] = wc_list_init();
     }
@@ -80,6 +95,7 @@ void dict_free(dict_t *dict) {
 bool dict_load_file(dict_t *dict, const char *filename) {
     assert(dict);
     assert(filename);
+    bool ret = true;
 
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
@@ -92,7 +108,8 @@ bool dict_load_file(dict_t *dict, const char *filename) {
 
     if (ferror(file)) {
         perror("fread");
-        return false;
+        ret = false;
+        goto dict_clean;
     }
 
     dict->buffer[chunk_size] = '\0';
@@ -105,8 +122,9 @@ bool dict_load_file(dict_t *dict, const char *filename) {
         bloom_add(dict->bloom_filter, line_buffer);
     }
 
+dict_clean:
     fclose(file);
-    return true;
+    return ret;
 }
 
 bool dict_exist(const dict_t *dict, const char *word) {
@@ -189,7 +207,7 @@ void wc_list_append(wc_cell_t *wc_list, const char *word, enum POS_TAG postag) {
         if (current->word == NULL) break;
 
         // case 2: current is a cell with the exact word, and next is not null
-        if (strncpy(current->word, word, strlen(current->word)) == 0) {
+        if (strncmp(current->word, word, strlen(current->word)) == 0) {
             current->word_categories |= postag;
             return;
         }
@@ -241,9 +259,20 @@ int32_t wc_list_get(wc_cell_t *wc_list, const char *word) {
 wc_hashtable_t *wc_hashtable_init() {
     wc_hashtable_t *hashtable = calloc(1, sizeof(wc_hashtable_t));
 
+    if (hashtable == NULL) {
+        perror("calloc");
+        return NULL;
+    }
+
     hashtable->hashtable_width = WC_HASHTABLE_DEFAULT_WIDTH;
     hashtable->hashtable =
         calloc(WC_HASHTABLE_DEFAULT_WIDTH, sizeof(wc_cell_t *));
+
+    if (hashtable->hashtable == NULL) {
+        perror("calloc");
+        free(hashtable);
+        return NULL;
+    }
 
     return hashtable;
 }
@@ -299,12 +328,15 @@ wc_hashtable_t *wc_hashtable_resize(wc_hashtable_t *hashtable) {
 void wc_hashtable_append(wc_hashtable_t *hashtable, const char *word,
                          enum POS_TAG postag) {
     assert(hashtable);
+    assert(hashtable->hashtable);
     assert(word);
+    assert(utf8_char_len(word) > 0);
 
-    int index = hashlittle(word, strlen(word), HASH_SEED);
-    if (wc_list_count(
+    uint32_t index = wc_hash(word);
+    if (hashtable->hashtable[index % hashtable->hashtable_width] &&
+        wc_list_count(
             hashtable->hashtable[index % hashtable->hashtable_width]) >
-        WC_HASHTABLE_MAX_LENGTH) {
+            WC_HASHTABLE_MAX_LENGTH) {
         wc_hashtable_resize(hashtable);
 
         // TODO: under extreme situation, it is possible to trigger resize each
@@ -323,9 +355,90 @@ int32_t wc_hashtable_get(const wc_hashtable_t *hashtable, const char *word) {
     assert(hashtable);
     assert(word);
 
-    int index = hashlittle(word, strlen(word), HASH_SEED);
+    uint32_t index = wc_hash(word);
 
     int val = wc_list_get(
         hashtable->hashtable[index % hashtable->hashtable_width], word);
     return val;
+}
+
+cat_dict_t *cat_dict_init() {
+    cat_dict_t *ret            = calloc(1, sizeof(cat_dict_t));
+    ret->bloom_filter          = bloom_init();
+    ret->word_categories_table = wc_hashtable_init();
+
+    return ret;
+}
+
+void cat_dict_free(cat_dict_t *cat_dict) {
+    if (cat_dict == NULL) return;
+
+    bloom_free(cat_dict->bloom_filter);
+    wc_hashtable_free(cat_dict->word_categories_table);
+
+    free(cat_dict);
+}
+
+bool cat_dict_load(cat_dict_t *cat_dict, const char *filename) {
+    assert(cat_dict);
+    assert(filename);
+
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        perror("fopen");
+        return false;
+    }
+
+    char line_buffer[1024]   = { 0 };
+    char tc_word_buffer[256] = { 0 };
+    char sc_word_buffer[256] = { 0 };
+    char postag_buffer[16]   = { 0 };
+
+    while (fgets(line_buffer, sizeof(line_buffer), file)) {
+        if (sscanf(line_buffer, "%s %s %s\n", tc_word_buffer, sc_word_buffer,
+                   postag_buffer) == 0) {
+            continue;
+        }
+
+        assert(utf8_char_len(tc_word_buffer) > 0);
+        assert(utf8_char_len(sc_word_buffer) > 0);
+
+        enum POS_TAG postag = POS_TAG_parse(postag_buffer);
+        if (postag == POS_TAG_NULL) continue;
+
+        cat_dict_add(cat_dict, sc_word_buffer, postag);
+        cat_dict_add(cat_dict, tc_word_buffer, postag);
+    }
+
+    cat_dict->loaded = true;
+
+    fclose(file);
+    return true;
+}
+
+void cat_dict_add(cat_dict_t *cat_dict, const char *word, enum POS_TAG postag) {
+    bloom_add(cat_dict->bloom_filter, word);
+    wc_hashtable_append(cat_dict->word_categories_table, word, postag);
+}
+
+int32_t cat_dict_lookup(cat_dict_t *cat_dict, const char *word) {
+    assert(cat_dict);
+    if (word == NULL || word[0] == '\0') return 0;
+    if (!bloom_exist(cat_dict->bloom_filter, word)) return 0;
+
+    int32_t ret = wc_hashtable_get(cat_dict->word_categories_table, word);
+    return ret;
+}
+
+bool cat_dict_lookup_unique(cat_dict_t *cat_dict, const char *word,
+                            enum POS_TAG *postag) {
+    assert(cat_dict);
+    assert(postag);
+
+    int32_t categories = cat_dict_lookup(cat_dict, word);
+    if (!powerof2(categories)) return false;
+
+    *postag = (enum POS_TAG)categories;
+
+    return true;
 }
