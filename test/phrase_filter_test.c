@@ -37,7 +37,7 @@ void test_two() {
     char buffer[1024] = { 0 };
     words_snprint(buffer, sizeof(buffer), words);
 
-    assert(strncmp(buffer, "一百三十二<.> 人<.>", sizeof(buffer)) == 0);
+    assert(strncmp(buffer, "一百三十二<> 人<>", sizeof(buffer)) == 0);
     assert(words->count == 2);
 
     words_free(words);
@@ -55,8 +55,26 @@ void test_three() {
     char buffer[1024] = { 0 };
     words_snprint(buffer, sizeof(buffer), words);
 
-    assert(strncmp(buffer, "第九十九<.> 苹<.> 果<.>", sizeof(buffer)) == 0);
+    assert(strncmp(buffer, "第九十九<> 苹<> 果<>", sizeof(buffer)) == 0);
     assert(words->count == 3);
+
+    words_free(words);
+    phrase_free(p);
+}
+
+void test_four() {
+    phrase_t *p = phrase_init("一个苹果");
+    segmentation_t seg;
+
+    phrase_filter_ordinal_number(p, &p->cn_char_seg, &seg);
+    phrase_filter_cardinal_number(p, &seg, &seg);
+
+    words_t *words = phrase_segment(p, &seg);
+
+    char buffer[1024] = { 0 };
+    words_snprint(buffer, sizeof(buffer), words);
+
+    assert(strncmp(buffer, "一<> 个<> 苹<> 果<>", sizeof(buffer)) == 0);
 
     words_free(words);
     phrase_free(p);
@@ -66,4 +84,5 @@ int main() {
     test_one();
     test_two();
     test_three();
+    test_four();
 }

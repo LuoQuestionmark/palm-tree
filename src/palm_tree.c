@@ -50,8 +50,11 @@ int main() {
         words_t *words = phrase_segment(p, &seg);
 
         postag_tag_dict_unique(words, cat_dict);
+        postag_tag_cn_aux(words);
+        postag_tag_num(words);
+        postag_tag_latin(words);
 
-        words_fprint(stdout, words);
+        words_cprint(words);
         puts("");
         words_free(words);
     }

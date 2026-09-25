@@ -50,4 +50,5 @@ int words_eval(words_t *words);     // evaluate current words separation
 
 // helper function, print to help dev
 void words_fprint(FILE *restrict stream, words_t *words);
+void words_cprint(words_t *words);
 void words_snprint(char str[restrict], size_t size, words_t *words);

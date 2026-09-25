@@ -19,7 +19,7 @@ static bool is_cn_fw_digit(const char *utf8_char) {
 static bool is_cn_char_digit(const char *utf8_char) {
     if (utf8_char == NULL || utf8_char[0] == '0') return false;
 
-    static const char numbers[11][4] = { "〇", "一", "二", "三", "四", "五",
+    static const char numbers[11][5] = { "〇", "一", "二", "三", "四", "五",
                                          "六", "七", "八", "九", "零" };
     for (int i = 0; i < 11; i++) {
         if (strncmp(utf8_char, numbers[i], sizeof(numbers[i])) == 0)
@@ -126,7 +126,7 @@ int is_ordinal_cn_char_digits(const char *utf8_string) {
     char buffer[4];
     const char *next = utf8_char_consume(utf8_string, buffer);
     if (strncmp(buffer, "第", sizeof("第")) != 0) {
-        return -1;
+        return 0;
     }
 
     int len = is_cn_char_digits(next);
@@ -135,5 +135,5 @@ int is_ordinal_cn_char_digits(const char *utf8_string) {
         return len + sizeof("第") - 1;
     }
 
-    return -1;
+    return 0;
 }

@@ -36,6 +36,7 @@ target_link_libraries(palm_phrase
 
 add_library(palm_postag
     src/postag/postag.c
+    src/patterns/cn_aux.c
     src/utils/dict.c
     src/words.c
 )

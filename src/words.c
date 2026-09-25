@@ -91,6 +91,20 @@ void words_fprint(FILE *restrict stream, words_t *words) {
     fflush(stream);
 }
 
+void words_cprint(words_t *words) {
+    assert(words);
+    for (int i = 0; i < words->count - 1; i++) {
+        printf("%s\033[31m%s\033[0m ", words->word_strings[i],
+               POS_TAG_str(words->pos_tags[i]));
+    }
+
+    // print the last one separately, with no trailing space
+    printf("%s\033[31m%s\033[0m", words->word_strings[words->count - 1],
+           POS_TAG_str(words->pos_tags[words->count - 1]));
+
+    fflush(stdout);
+}
+
 void words_snprint(char str[restrict], size_t size, words_t *words) {
     assert(str);
     assert(words);
