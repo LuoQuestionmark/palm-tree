@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-const char POS_TAG_literals[][5] = { "ADJ",  "ADV",  "INTJ", "NOUN",  "PROPN",
+const char POS_TAG_literals[][6] = { "ADJ",  "ADV",  "INTJ", "NOUN",  "PROPN",
                                      "VERB", "ADP",  "AUX",  "CCONJ", "DET",
                                      "NUM",  "PART", "PRON", "SCONJ", "PUNCT",
                                      "SYM",  "X" };

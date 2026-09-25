@@ -126,9 +126,16 @@ void test4() {
     wc_hashtable_free(table);
 }
 
+void test5() {
+    wc_hashtable_t *table = wc_hashtable_init();
+    wc_hashtable_append(table, "《", POS_TAG_PUNCT);
+    assert(wc_hashtable_get(table, "《") != 0);
+}
+
 int main() {
     assert(test1() == 0);
     test2();
     test3();
     test4();
+    test5();
 }
