@@ -4,6 +4,11 @@ Chinese Segmentation and New Word Detection using Conditional Random Field.pdf
 Conditional Random Fields: Probabilistic Models for Segmenting and Labeling Sequence Data.pdf
 CoNLL-U Format.html
 
+# tex auxiliaries
+
+*.bbl
+*.synctex.gz
+
 # note
 
 dev_note.md
