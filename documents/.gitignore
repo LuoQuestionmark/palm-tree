@@ -1,0 +1,10 @@
+# articles for development reference
+
+Chinese Segmentation and New Word Detection using Conditional Random Field.pdf
+Conditional Random Fields: Probabilistic Models for Segmenting and Labeling Sequence Data.pdf
+CoNLL-U Format.html
+
+# note
+
+dev_note.md
+proof-of-concept.ipynb
